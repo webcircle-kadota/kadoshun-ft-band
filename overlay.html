@@ -498,16 +498,17 @@ const CONFIG = {
       ],
     },
   },
+  // スポンサー表「26年上半期」シートの企業名（2026-10-09 時点）。英数字は半角にそろえた
   sponsors: [
-    ["株式会社オフザレコード", "様"],
+    ["オフ・ザ・レコード", "様"],
     ["株式会社ナチュレ", "様"],
-    ["GOLF LOUNGE BeBe", "様"],
-    ["ナチュラルマッスル", "様"],
-    ["KUU", "様"],
-    ["victoriafruit", "様"],
-    ["株式会社はしぐち", "様"],
+    ["株式会社BeBe16", "様"],
+    ["株式会社ハースコーポレーション", "様"],
+    ["クスノキノ株式会社", "様"],
+    ["Victoriafruit株式会社", "様"],
+    ["株式会社ユービリゾート", "様"],
     ["株式会社フリート", "様"],
-    ["NextDeal", ""],
+    ["NextDeal合同会社", ""],
   ],
 };
 // ======================================================================
@@ -670,7 +671,7 @@ addEventListener("message", e => {
 
 // 中継サービス（ntfy.sh）から。URL に key=合言葉 があるときだけつなぐ。
 //   合言葉はプログラムに書かず URL にだけ持たせる（知っている人だけが操作できる）
-const KEY = (params.get("key") || "").replace(/[^A-Za-z0-9_-]/g, "");
+const KEY = (params.get("key") || "").toLowerCase().replace(/[^a-z0-9_]/g, "");   // コントロール画面と同じ正規化
 const RELAY = "https://ntfy.sh/";
 const topic = KEY ? "kadoshun-ft-" + KEY : "";
 function parseRelay(raw) {

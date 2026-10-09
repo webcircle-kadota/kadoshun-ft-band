@@ -12,6 +12,7 @@
   画面サイズ 1920 x 1080 / 背景透過 / アニメーション付き
 
   場面ごとに帯の形が変わる:
+    standby    配信開始前の待機画面       … 画面全体（不透明）。カウントダウン・ファイナリスト・スポンサー
     pre        オープニング（開始前）     … 全幅帯（上の左右プレート＋下の帯）
     live       対戦中                     … コンパクト帯（上中央のクレスト＋右下のスポンサー）
     champion   対戦で優勝が決まった瞬間   … コンパクト帯（CHAMPION 表示＋紙吹雪）
@@ -29,7 +30,8 @@
        幅 1920 / 高さ 1080 / カスタムCSS は空 / KADOSHUN のオーバーレイより上に置く
 
   URL パラメータ
-    mode=pre|live|champion|interview   （デフォルト pre）
+    mode=standby|pre|live|champion|interview   （デフォルト pre）
+    start=2026-10-10T14:30             待機画面のカウントダウンの開始時刻（日本時間。省略時は CONFIG.standby.start）
     name=優勝者名                       champion / interview で表示
     scene=chips    チップカウント画面用（コンパクト帯のクレストを1段にし、スポンサー欄を消す）
     sponsor=0      スポンサー欄を消す
@@ -38,7 +40,7 @@
     bg=1           確認用の背景（OBS では付けない）
 
   キー（OBS のソースを右クリック →「対話」）
-    1 オープニング / 2 対戦中 / 3 優勝決定 / 4 ヒーローインタビュー
+    0 待機画面 / 1 オープニング / 2 対戦中 / 3 優勝決定 / 4 ヒーローインタビュー
     C チップカウント画面用の切替 / → か Space 次のメッセージ
 -->
 <style>
@@ -362,6 +364,119 @@
   body.scene-chips #c-sponsor { visibility: hidden; }
   body.no-sponsor #c-sponsor, body.no-sponsor #f-sponsor { visibility: hidden; }
 
+  /* ================================================================
+     待機画面（配信開始前）：画面全体を覆う。透過しない
+     ================================================================ */
+  #standby {
+    position: absolute; inset: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 62%, rgba(24,96,56,.42) 0%, rgba(10,40,24,.25) 45%, transparent 75%),
+      radial-gradient(ellipse 60% 40% at 50% -5%, rgba(231,195,106,.18), transparent 70%),
+      #07070a;
+    opacity: 0; visibility: hidden;
+    transition: opacity .9s ease, visibility 0s linear .9s;
+  }
+  body.L-standby #standby { opacity: 1; visibility: visible; transition: opacity .9s ease; }
+  .sb-beam {
+    position: absolute; width: 1400px; height: 1400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(231,195,106,.10), transparent 60%);
+    filter: blur(20px);
+    animation: beam 26s ease-in-out infinite alternate;
+  }
+  .sb-beam.b2 { background: radial-gradient(circle, rgba(40,150,90,.12), transparent 60%); animation-duration: 32s; animation-delay: -12s; }
+  @keyframes beam {
+    0%   { transform: translate(-500px, -300px); }
+    50%  { transform: translate(900px, 100px); }
+    100% { transform: translate(200px, -500px); }
+  }
+  .sb-suit {
+    position: absolute; font-size: 420px; line-height: 1;
+    color: rgba(231,195,106,.035);
+    animation: drift 40s ease-in-out infinite alternate;
+  }
+  .sb-suit.r { color: rgba(224,33,63,.035); }
+  @keyframes drift { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-80px) rotate(8deg); } }
+
+  .sb-head {
+    position: absolute; left: 0; right: 0; top: 64px;
+    display: flex; align-items: center; justify-content: center; gap: 28px;
+  }
+  .sb-head .emblem { width: 112px; height: 112px; }
+  .sb-head .coin .face {
+    box-shadow: inset 0 0 0 3px var(--gold-mid), inset 0 0 0 7px #0d0c10, inset 0 0 0 9px rgba(231,195,106,.55), 0 0 28px rgba(231,195,106,.35);
+  }
+  .sb-head .logo-mask { width: 66px; height: 71px; }
+  .sb-head .suit { font-size: 60px; }
+  .sb-head .club { font-size: 56px; font-weight: 700; letter-spacing: .16em; line-height: 1; }
+  .sb-head .sub { margin-top: 12px; display: flex; align-items: center; gap: 16px; font-size: 28px; font-weight: 900; letter-spacing: .1em; }
+  .sb-head .tag {
+    font-family: "Oswald", sans-serif; font-size: 22px; font-weight: 700; letter-spacing: .12em;
+    color: var(--ink); background: var(--gold-grad); padding: 3px 12px 2px;
+    clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  }
+
+  .sb-center { position: absolute; left: 0; right: 0; top: 262px; text-align: center; }
+  .sb-soon { font-size: 30px; letter-spacing: .5em; color: var(--gold); padding-left: .5em; }
+  .sb-title { margin-top: 8px; font-size: 92px; font-weight: 900; letter-spacing: .08em; line-height: 1.1; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+  .sb-count {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 150px; font-weight: 700; line-height: 1.05; letter-spacing: .04em;
+    font-variant-numeric: tabular-nums;
+    filter: drop-shadow(0 0 26px rgba(231,195,106,.35));
+  }
+  .sb-count.done { font-family: "Noto Sans JP", sans-serif; font-size: 84px; font-weight: 900; letter-spacing: .12em; padding: 30px 0 14px; animation: soon-pulse 1.6s ease-in-out infinite; }
+  @keyframes soon-pulse { 50% { opacity: .55; } }
+  .sb-when { margin-top: 2px; font-size: 30px; letter-spacing: .12em; color: var(--muted); }
+  .sb-when b { color: var(--white); font-weight: 700; }
+  .sb-info { margin-top: 14px; font-size: 24px; letter-spacing: .08em; color: var(--muted); }
+  .sb-info em { color: var(--gold); font-weight: 900; }
+
+  .sb-players { position: absolute; left: 70px; right: 70px; top: 726px; }
+  .sb-players .cap { display: flex; align-items: center; gap: 18px; font-size: 22px; letter-spacing: .3em; color: var(--gold); margin-bottom: 18px; }
+  .sb-players .cap::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(231,195,106,.6), transparent); }
+  .sb-grid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 12px; }
+  .pcard {
+    position: relative;
+    padding: 14px 12px 12px;
+    background: linear-gradient(180deg, rgba(30,27,36,.92), rgba(14,13,18,.92));
+    border: 1px solid rgba(231,195,106,.22);
+    min-width: 0;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .7s ease, transform .7s var(--ease-in), border-color .5s, box-shadow .5s;
+    transition-delay: var(--d, 0s);
+  }
+  body.L-standby .pcard { opacity: 1; transform: none; }
+  .pcard.spot { border-color: rgba(231,195,106,.85); box-shadow: 0 0 24px rgba(231,195,106,.35), inset 0 0 18px rgba(231,195,106,.12); transition-delay: 0s; }
+  .pcard .no { position: absolute; right: 8px; top: 6px; font-size: 16px; color: rgba(231,195,106,.55); }
+  .pcard .nm { font-size: 20px; font-weight: 900; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px; }
+  .pcard .st { margin-top: 4px; font-size: 13px; line-height: 1.35; color: var(--muted); height: 2.7em; overflow: hidden; }
+  .pcard .ch { display: inline-block; margin-top: 8px; font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .pcard .ch small { font-size: 14px; margin-left: 4px; }
+  .pcard .rv {
+    position: absolute; left: 12px; top: -11px;
+    font-size: 12px; font-weight: 900; letter-spacing: .08em;
+    color: #fff; background: var(--red); padding: 1px 8px;
+  }
+
+  .sb-sponsor {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 64px;
+    display: flex; align-items: center;
+    background: rgba(0,0,0,.55);
+    border-top: 1px solid rgba(231,195,106,.35);
+  }
+  .sb-sponsor .lbl {
+    flex: none; height: 100%; display: grid; place-items: center;
+    padding: 0 28px; font-size: 18px; letter-spacing: .3em; color: var(--ink);
+    background: var(--gold-grad);
+  }
+  .sb-marquee { flex: 1; overflow: hidden; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+  .sb-track { display: inline-block; padding-left: 40px; animation: marquee var(--dur, 60s) linear infinite; font-size: 26px; font-weight: 900; color: var(--white); }
+  .sb-track span { margin-right: 26px; }
+  .sb-track i { font-style: normal; color: var(--gold); margin-right: 26px; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
   /* 優勝の光 */
   #champ-flash {
     position: absolute; inset: 0; opacity: 0; pointer-events: none;
@@ -378,6 +493,47 @@
 <body>
 <div id="stage">
   <div id="champ-flash"></div>
+
+  <!-- 待機画面 -->
+  <div id="standby" aria-hidden="true">
+    <div class="sb-beam" style="left:-200px; top:-300px"></div>
+    <div class="sb-beam b2" style="left:600px; top:200px"></div>
+    <div class="sb-suit" style="left:60px; top:300px">♠</div>
+    <div class="sb-suit r" style="left:1500px; top:120px; animation-delay:-14s">♥</div>
+    <div class="sb-suit r" style="left:1180px; top:560px; animation-delay:-26s">♦</div>
+    <div class="sb-suit" style="left:520px; top:-120px; animation-delay:-6s">♣</div>
+
+    <div class="sb-head">
+      <div class="emblem">
+        <div class="coin">
+          <div class="face front"><div class="logo-mask"></div></div>
+          <div class="face back"><span class="suit">♠</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="club en">KADOSHUN POKER CLUB</div>
+        <div class="sub"><span class="tag">2026 1H</span><span class="goldtxt">上半期 FINAL TABLE</span></div>
+      </div>
+    </div>
+
+    <div class="sb-center">
+      <div class="sb-soon en">STARTING SOON</div>
+      <div class="sb-title">まもなく配信開始</div>
+      <div><span class="sb-count en goldtxt" id="sb-count">--:--:--</span></div>
+      <div class="sb-when" id="sb-when"></div>
+      <div class="sb-info" id="sb-info"></div>
+    </div>
+
+    <div class="sb-players">
+      <div class="cap en">FINALISTS ─ 9 PLAYERS</div>
+      <div class="sb-grid" id="sb-grid"></div>
+    </div>
+
+    <div class="sb-sponsor">
+      <div class="lbl en">SPONSORED BY</div>
+      <div class="sb-marquee"><div class="sb-track" id="sb-track"></div></div>
+    </div>
+  </div>
 
   <!-- 全幅帯 -->
   <div id="full">
@@ -452,7 +608,30 @@
 const CONFIG = {
   holdMs: 9000,
   sponsorMs: 4000,
+  // 待機画面（配信開始前）
+  standby: {
+    start: "2026-10-10T14:30:00+09:00",   // 配信開始（YouTube の予約時刻）
+    info: "総チップ <em>1,863,300</em> 点 ・ 開始ブラインド <em>500 / 1,000</em> ・ 1レベル20分",
+    // 持ち込みチップの多い順。revive: 敗者復活戦からの勝ち上がり
+    players: [
+      { name: "たぐちまさき",   style: "安定基盤のスパイククリエイター", chips: 383100 },
+      { name: "宮嶋先生",       style: "絶界収益錬金術師",             chips: 347000 },
+      { name: "サオリ",         style: "最後まで見届ける新進レギュラー", chips: 284500 },
+      { name: "ジーニョ",       style: "黄金律のベットモンスター",       chips: 281900 },
+      { name: "ペンギンちゃん", style: "不死身の勝負師",               chips: 193700, revive: true },
+      { name: "ぬくみん",       style: "鋼鉄のBB守護神",               chips: 165100 },
+      { name: "ヤス",           style: "煉獄のオールイン狂",           chips: 108000, revive: true },
+      { name: "ハヤト",         style: "天秤の調停者",                 chips: 51700 },
+      { name: "Shiori",         style: "最後まで見届ける迷える張り師", chips: 48300, revive: true },
+    ],
+  },
   modes: {
+    standby: {                   // 待機画面
+      layout: "standby",
+      label: "",
+      title: "",
+      messages: [],
+    },
     pre: {                       // オープニング
       layout: "full",
       label: "TODAY",
@@ -501,13 +680,13 @@ const CONFIG = {
   // スポンサー表「26年上半期」シートの企業名（2026-10-09 時点）。英数字は半角にそろえた
   sponsors: [
     ["オフ・ザ・レコード", "様"],
-    ["株式会社ナチュレ", "様"],
+    ["株式会社NATURE", "様"],
     ["株式会社BeBe16", "様"],
     ["株式会社ハースコーポレーション", "様"],
     ["クスノキノ株式会社", "様"],
     ["Victoriafruit株式会社", "様"],
     ["株式会社ユービリゾート", "様"],
-    ["株式会社フリート", "様"],
+    ["フリート合同会社", "様"],
     ["NextDeal合同会社", ""],
   ],
 };
@@ -541,6 +720,7 @@ function applyState() {
   const m = CONFIG.modes[mode];
   body.classList.toggle("L-full", m.layout === "full");
   body.classList.toggle("L-compact", m.layout === "compact");
+  body.classList.toggle("L-standby", m.layout === "standby");
   if (m.layout === "full") {
     $("f-title").textContent = m.title;
     const meta = (m.meta || "").replace("{name}", safeName());
@@ -641,6 +821,7 @@ function setMode(m) {
 }
 function setScene(chips) { body.classList.toggle("scene-chips", chips); }
 addEventListener("keydown", e => {
+  if (e.key === "0") setMode("standby");
   if (e.key === "1") setMode("pre");
   if (e.key === "2") setMode("live");
   if (e.key === "3") setMode("champion");
@@ -717,10 +898,63 @@ Promise.all([
 ]).then(() => { start(); listenRelay(); });
 
 // ---------- 光の粒・紙吹雪 ----------
+// ---------- 待機画面 ----------
+const SB = CONFIG.standby;
+// start= は日本時間として読む（タイムゾーン指定があればそれに従う）
+const startParam = params.get("start");
+const startAt = new Date(startParam ? (/(Z|[+-]\d\d:?\d\d)$/i.test(startParam) ? startParam : startParam + "+09:00") : SB.start);
+const WD = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+(function buildStandby() {
+  if (!isNaN(startAt)) {
+    const j = new Date(startAt.getTime() + 9 * 3600e3);   // 表示は日本時間
+    const pad = n => String(n).padStart(2, "0");
+    $("sb-when").innerHTML = `配信開始　<b class="en">${j.getUTCFullYear()}.${pad(j.getUTCMonth() + 1)}.${pad(j.getUTCDate())} ${WD[j.getUTCDay()]}　${pad(j.getUTCHours())}:${pad(j.getUTCMinutes())}</b>`;
+  }
+  $("sb-info").innerHTML = SB.info;
+  $("sb-grid").innerHTML = SB.players.map((p, i) => `
+    <div class="pcard" style="--d:${(0.15 + i * 0.07).toFixed(2)}s">
+      ${p.revive ? '<span class="rv">敗者復活</span>' : ""}
+      <span class="no en">${i + 1}</span>
+      <div class="nm">${escHtml(p.name)}</div>
+      <div class="st">${escHtml(p.style)}</div>
+      <div class="ch en goldtxt">${p.chips.toLocaleString("en-US")}<small>pt</small></div>
+    </div>`).join("");
+  const names = CONFIG.sponsors.map(([n, suf]) => `<span>${escHtml(n)}${suf ? " " + suf : ""}</span><i>◆</i>`).join("");
+  const track = $("sb-track");
+  track.innerHTML = names + names;            // 2周分並べて -50% 動かすと途切れない
+  track.style.setProperty("--dur", Math.max(30, CONFIG.sponsors.length * 7) + "s");
+})();
+function tickCountdown() {
+  const el = $("sb-count");
+  const left = Math.floor((startAt - Date.now()) / 1000);
+  if (isNaN(left) || left <= 0) {
+    el.textContent = "まもなく開始します";
+    el.classList.add("done");
+    return;
+  }
+  const h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), sec = left % 60;
+  el.textContent = [h, m, sec].map(n => String(n).padStart(2, "0")).join(":");
+  el.classList.remove("done");
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+// ファイナリストを1人ずつ順に光らせる
+let spot = 0;
+setInterval(() => {
+  if (!body.classList.contains("L-standby")) return;
+  const cards = document.querySelectorAll(".pcard");
+  cards.forEach(c => c.classList.remove("spot"));
+  if (cards.length) cards[spot++ % cards.length].classList.add("spot");
+}, 1800);
+
 const cv = $("fx");
 const ctx = cv.getContext("2d");
 const P = [];
 function sparkZones() {
+  if (layoutOf() === "standby") {
+    return [{ x0: 0, x1: 1920, y: 1060, dir: -1, w: 1, slow: true }];
+  }
   if (layoutOf() === "full") {
     return [
       { x0: 0, x1: 760, y: 176, dir: 1, w: 1 },
@@ -744,9 +978,9 @@ function spark() {
     x: z.x0 + Math.random() * (z.x1 - z.x0),
     y: z.y,
     vx: (Math.random() - .5) * .4,
-    vy: z.dir * ((full ? .25 : .2) + Math.random() * (full ? .7 : .5)),
-    r: .8 + Math.random() * 1.6,
-    life: 0, max: (full ? 70 : 50) + Math.random() * (full ? 90 : 60),
+    vy: z.dir * (z.slow ? .5 + Math.random() * 1.1 : (full ? .25 : .2) + Math.random() * (full ? .7 : .5)),
+    r: .8 + Math.random() * (z.slow ? 2.2 : 1.6),
+    life: 0, max: z.slow ? 260 + Math.random() * 380 : (full ? 70 : 50) + Math.random() * (full ? 90 : 60),
   });
 }
 function celebrate() {
@@ -773,7 +1007,7 @@ function celebrate() {
 }
 function frame() {
   ctx.clearRect(0, 0, 1920, 1080);
-  const cap = layoutOf() === "full" ? 120 : 60;
+  const cap = layoutOf() === "standby" ? 160 : layoutOf() === "full" ? 120 : 60;
   if (sparksOn && P.length < cap && Math.random() < .45) spark();
   for (let i = P.length - 1; i >= 0; i--) {
     const p = P[i];

@@ -50,8 +50,30 @@
   .conn.ok i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
   .conn.ng i { background: var(--ng); }
 
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
-  @media (max-width: 960px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "preview controls" "settings controls";
+    gap: 20px;
+    align-items: start;
+  }
+  .preview { grid-area: preview; min-width: 0; }
+  .controls { grid-area: controls; }
+  .settings {
+    grid-area: settings;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+    min-width: 0;
+  }
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "preview" "controls" "settings"; }
+  }
+  @media (max-width: 700px) {
+    .settings { grid-template-columns: minmax(0, 1fr); }
+  }
 
   .monitor {
     position: relative; width: 100%; max-width: 100%;
@@ -138,7 +160,7 @@
   </section>
 
   <div class="grid" id="main">
-    <section aria-label="プレビュー">
+    <section class="preview" aria-label="プレビュー">
       <div class="monitor" id="monitor">
         <img class="ref" id="ref" src="img/ref_hand.jpg" alt="">
         <iframe id="band" title="FT帯プレビュー" src="overlay.html"></iframe>
@@ -188,7 +210,9 @@
         <label class="check" for="chips" style="margin-top:0"><input type="checkbox" id="chips"> チップカウント画面用（帯を1段にしてスポンサー欄を消す）</label>
         <label class="check" for="sponsor"><input type="checkbox" id="sponsor" checked> スポンサー欄を表示</label>
       </section>
+    </div>
 
+    <div class="settings">
       <section class="card">
         <h2>OBS</h2>
         <div class="sub" style="margin-top:0">配信用パソコンの OBS に登録する URL（ブラウザソース・幅1920・高さ1080）</div>
@@ -238,7 +262,7 @@
       <h3>当日の使い方</h3>
       <ul>
         <li>この画面のボタンを押すと、数秒以内に OBS の帯が切り替わる</li>
-        <li>スマホは操作列のいちばん下「KEY」のQRコードを読み取って開く（同じ合言葉どうしで連動する）</li>
+        <li>スマホは「KEY」欄のQRコードを読み取って開く（同じ合言葉どうしで連動する）</li>
         <li>OBS を再起動しても、最後に送った場面で表示される</li>
         <li>反映されないときは「今の設定をもう一度送る」</li>
       </ul>

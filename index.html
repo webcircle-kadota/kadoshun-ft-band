@@ -151,19 +151,6 @@
 
     <div class="controls">
       <section class="card">
-        <h2>KEY</h2>
-        <div class="keybox">
-          <div id="qr" aria-label="この画面を開くQRコード"></div>
-          <div style="min-width:0">
-            <div class="sub" style="margin:0">この端末の合言葉</div>
-            <div class="keyval" id="key-show"></div>
-            <p class="hint">スマホでQRコードを読み取ると、同じ合言葉でこの画面が開きます。</p>
-            <button class="btn" id="key-change">別の合言葉に切り替える</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
         <h2>SCENE</h2>
         <div class="modes" role="group" aria-label="場面">
           <button class="mode" data-mode="pre" aria-pressed="true"><b>OPENING</b><small>オープニング・全幅</small></button>
@@ -221,6 +208,19 @@
         </div>
         <p class="hint" id="rekey-note" hidden>作り直しました。OBS のブラウザソースの URL も新しいものに差し替えてください。</p>
       </section>
+
+      <section class="card">
+        <h2>KEY</h2>
+        <div class="keybox">
+          <div id="qr" aria-label="この画面を開くQRコード"></div>
+          <div style="min-width:0">
+            <div class="sub" style="margin:0">この端末の合言葉</div>
+            <div class="keyval" id="key-show"></div>
+            <p class="hint">スマホでQRコードを読み取ると、同じ合言葉でこの画面が開きます。</p>
+            <button class="btn" id="key-change">別の合言葉に切り替える</button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -238,7 +238,7 @@
       <h3>当日の使い方</h3>
       <ul>
         <li>この画面のボタンを押すと、数秒以内に OBS の帯が切り替わる</li>
-        <li>スマホは右上の「KEY」のQRコードを読み取って開く（同じ合言葉どうしで連動する）</li>
+        <li>スマホは操作列のいちばん下「KEY」のQRコードを読み取って開く（同じ合言葉どうしで連動する）</li>
         <li>OBS を再起動しても、最後に送った場面で表示される</li>
         <li>反映されないときは「今の設定をもう一度送る」</li>
       </ul>

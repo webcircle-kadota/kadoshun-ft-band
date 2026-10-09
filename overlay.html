@@ -12,7 +12,7 @@
   画面サイズ 1920 x 1080 / 背景透過 / アニメーション付き
 
   場面ごとに帯の形が変わる:
-    standby    配信開始前の待機画面       … 画面全体（不透明）。カウントダウン・ファイナリスト・スポンサー
+    standby    配信開始前の待機画面       … 画面全体（不透明）。カウントダウン・賞品総額・ファイナリスト（1人ずつ）・スポンサー
     pre        オープニング（開始前）     … 全幅帯（上の左右プレート＋下の帯）
     live       対戦中                     … コンパクト帯（上中央のクレスト＋右下のスポンサー）
     champion   対戦で優勝が決まった瞬間   … コンパクト帯（CHAMPION 表示＋紙吹雪）
@@ -174,6 +174,7 @@
   body.L-full    #full .part,
   body.L-compact #compact .part { transition: transform .9s var(--ease-in) var(--d, 0s), clip-path .9s var(--ease-in) var(--d, 0s); }
   body.no-anim .part { transition: none !important; }
+  body.no-anim .sb-slide, body.no-anim #standby, body.no-anim .sb-dots span { transition: none !important; }
 
   /* ================================================================
      全幅帯（オープニング / ヒーローインタビュー）
@@ -416,13 +417,13 @@
     clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
   }
 
-  .sb-center { position: absolute; left: 0; right: 0; top: 262px; text-align: center; }
+  .sb-center { position: absolute; left: 0; right: 0; top: 240px; text-align: center; }
   .sb-soon { font-size: 30px; letter-spacing: .5em; color: var(--gold); padding-left: .5em; }
-  .sb-title { margin-top: 8px; font-size: 92px; font-weight: 900; letter-spacing: .08em; line-height: 1.1; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+  .sb-title { margin-top: 6px; font-size: 86px; font-weight: 900; letter-spacing: .08em; line-height: 1.1; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
   .sb-count {
     display: inline-block;
     margin-top: 4px;
-    font-size: 150px; font-weight: 700; line-height: 1.05; letter-spacing: .04em;
+    font-size: 140px; font-weight: 700; line-height: 1.05; letter-spacing: .04em;
     font-variant-numeric: tabular-nums;
     filter: drop-shadow(0 0 26px rgba(231,195,106,.35));
   }
@@ -433,32 +434,53 @@
   .sb-info { margin-top: 14px; font-size: 24px; letter-spacing: .08em; color: var(--muted); }
   .sb-info em { color: var(--gold); font-weight: 900; }
 
-  .sb-players { position: absolute; left: 70px; right: 70px; top: 726px; }
-  .sb-players .cap { display: flex; align-items: center; gap: 18px; font-size: 22px; letter-spacing: .3em; color: var(--gold); margin-bottom: 18px; }
+  .sb-prize {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-top: 14px; padding: 6px 22px 6px 6px;
+    border: 1px solid rgba(231,195,106,.55);
+    background: linear-gradient(90deg, rgba(231,195,106,.16), rgba(231,195,106,.04));
+  }
+  .sb-prize .k { font-size: 18px; font-weight: 700; letter-spacing: .2em; color: var(--ink); background: var(--gold-grad); padding: 4px 12px 3px; }
+  .sb-prize .v { font-size: 34px; font-weight: 900; letter-spacing: .04em; }
+  .sb-prize .v small { font-size: 20px; margin-left: 4px; }
+
+  /* ファイナリスト：1人ずつフェードで入れ替わる */
+  .sb-players { position: absolute; left: 70px; right: 70px; top: 716px; }
+  .sb-players .cap { display: flex; align-items: center; gap: 18px; font-size: 22px; letter-spacing: .3em; color: var(--gold); margin-bottom: 14px; }
   .sb-players .cap::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(231,195,106,.6), transparent); }
-  .sb-grid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 12px; }
-  .pcard {
-    position: relative;
-    padding: 14px 12px 12px;
-    background: linear-gradient(180deg, rgba(30,27,36,.92), rgba(14,13,18,.92));
-    border: 1px solid rgba(231,195,106,.22);
-    min-width: 0;
-    opacity: 0; transform: translateY(24px);
-    transition: opacity .7s ease, transform .7s var(--ease-in), border-color .5s, box-shadow .5s;
-    transition-delay: var(--d, 0s);
+  .sb-show {
+    position: relative; height: 196px;
+    background: linear-gradient(90deg, rgba(231,195,106,.10), rgba(20,18,24,.85) 30%, rgba(20,18,24,.85) 70%, rgba(231,195,106,.06));
+    border-top: 1px solid rgba(231,195,106,.45);
+    border-bottom: 1px solid rgba(231,195,106,.25);
   }
-  body.L-standby .pcard { opacity: 1; transform: none; }
-  .pcard.spot { border-color: rgba(231,195,106,.85); box-shadow: 0 0 24px rgba(231,195,106,.35), inset 0 0 18px rgba(231,195,106,.12); transition-delay: 0s; }
-  .pcard .no { position: absolute; right: 8px; top: 6px; font-size: 16px; color: rgba(231,195,106,.55); }
-  .pcard .nm { font-size: 20px; font-weight: 900; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px; }
-  .pcard .st { margin-top: 4px; font-size: 13px; line-height: 1.35; color: var(--muted); height: 2.7em; overflow: hidden; }
-  .pcard .ch { display: inline-block; margin-top: 8px; font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .pcard .ch small { font-size: 14px; margin-left: 4px; }
-  .pcard .rv {
-    position: absolute; left: 12px; top: -11px;
-    font-size: 12px; font-weight: 900; letter-spacing: .08em;
-    color: #fff; background: var(--red); padding: 1px 8px;
+  .sb-slide {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; gap: 44px;
+    opacity: 0; transform: translateX(36px); filter: blur(6px);
+    transition: opacity .8s ease, transform .9s var(--ease-in), filter .8s ease;
   }
+  .sb-slide.on  { opacity: 1; transform: none; filter: none; }
+  .sb-slide.off { opacity: 0; transform: translateX(-36px); filter: blur(6px); transition-timing-function: ease, var(--ease-out), ease; }
+  .sb-rank { width: 220px; text-align: center; flex: none; }
+  .sb-rank .l { font-size: 22px; letter-spacing: .4em; color: var(--muted); padding-left: .4em; }
+  .sb-rank .n { display: inline-block; font-size: 128px; font-weight: 700; line-height: 1; }
+  .sb-div { width: 2px; height: 140px; flex: none; background: linear-gradient(180deg, transparent, var(--gold-mid), transparent); }
+  .sb-pinfo { width: 900px; min-width: 0; }
+  .sb-pinfo .rv { display: inline-block; font-size: 16px; font-weight: 900; letter-spacing: .1em; color: #fff; background: var(--red); padding: 2px 10px; margin-bottom: 6px; }
+  .sb-pinfo .nm { font-size: 66px; font-weight: 900; line-height: 1.1; letter-spacing: .04em; white-space: nowrap; }
+  .sb-pinfo .st { display: inline-block; margin-top: 4px; font-size: 32px; font-weight: 900; letter-spacing: .06em; }
+  .sb-pinfo .ch { margin-top: 6px; font-size: 22px; letter-spacing: .08em; color: var(--muted); }
+  .sb-pinfo .ch b { font-family: "Oswald", sans-serif; font-size: 30px; font-weight: 700; color: var(--white); margin: 0 4px; font-variant-numeric: tabular-nums; }
+  .sb-dots { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+  .sb-dots span {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 15px; color: var(--muted);
+    border: 1px solid rgba(231,195,106,.35);
+    transition: background .5s, color .5s, border-color .5s;
+  }
+  .sb-dots span.on { background: var(--gold-grad); color: var(--ink); border-color: var(--gold); }
 
   .sb-sponsor {
     position: absolute; left: 0; right: 0; bottom: 0; height: 64px;
@@ -522,11 +544,13 @@
       <div><span class="sb-count en goldtxt" id="sb-count">--:--:--</span></div>
       <div class="sb-when" id="sb-when"></div>
       <div class="sb-info" id="sb-info"></div>
+      <div class="sb-prize" id="sb-prize"><span class="k en">PRIZE</span><span class="v goldtxt" id="sb-prize-v"></span></div>
     </div>
 
     <div class="sb-players">
       <div class="cap en">FINALISTS ─ 9 PLAYERS</div>
-      <div class="sb-grid" id="sb-grid"></div>
+      <div class="sb-show" id="sb-show"></div>
+      <div class="sb-dots en" id="sb-dots"></div>
     </div>
 
     <div class="sb-sponsor">
@@ -612,17 +636,19 @@ const CONFIG = {
   standby: {
     start: "2026-10-10T14:30:00+09:00",   // 配信開始（YouTube の予約時刻）
     info: "総チップ <em>1,863,300</em> 点 ・ 開始ブラインド <em>500 / 1,000</em> ・ 1レベル20分",
-    // 持ち込みチップの多い順。revive: 敗者復活戦からの勝ち上がり
+    prize: "賞品総額 170万円<small>相当</small>",
+    rotateMs: 4500,                       // ファイナリストを1人ずつ切り替える間隔
+    // 上半期ランキング順。chips は持ち込みチップ、revive は敗者復活戦からの勝ち上がり
     players: [
-      { name: "たぐちまさき",   style: "安定基盤のスパイククリエイター", chips: 383100 },
-      { name: "宮嶋先生",       style: "絶界収益錬金術師",             chips: 347000 },
-      { name: "サオリ",         style: "最後まで見届ける新進レギュラー", chips: 284500 },
-      { name: "ジーニョ",       style: "黄金律のベットモンスター",       chips: 281900 },
-      { name: "ペンギンちゃん", style: "不死身の勝負師",               chips: 193700, revive: true },
-      { name: "ぬくみん",       style: "鋼鉄のBB守護神",               chips: 165100 },
-      { name: "ヤス",           style: "煉獄のオールイン狂",           chips: 108000, revive: true },
-      { name: "ハヤト",         style: "天秤の調停者",                 chips: 51700 },
-      { name: "Shiori",         style: "最後まで見届ける迷える張り師", chips: 48300, revive: true },
+      { rank: 1, name: "ハヤト",         style: "天秤の調停者",                 chips: 51700 },
+      { rank: 2, name: "ジーニョ",       style: "黄金律のベットモンスター",       chips: 281900 },
+      { rank: 3, name: "宮嶋先生",       style: "絶界収益錬金術師",             chips: 347000 },
+      { rank: 4, name: "サオリ",         style: "最後まで見届ける新進レギュラー", chips: 284500 },
+      { rank: 5, name: "たぐちまさき",   style: "安定基盤のスパイククリエイター", chips: 383100 },
+      { rank: 6, name: "ぬくみん",       style: "鋼鉄のBB守護神",               chips: 165100 },
+      { rank: 7, name: "ペンギンちゃん", style: "不死身の勝負師",               chips: 193700, revive: true },
+      { rank: 8, name: "ヤス",           style: "煉獄のオールイン狂",           chips: 108000, revive: true },
+      { rank: 9, name: "Shiori",         style: "最後まで見届ける迷える張り師", chips: 48300, revive: true },
     ],
   },
   modes: {
@@ -640,6 +666,7 @@ const CONFIG = {
       messages: [
         "上半期チャンピオンを決める最終決戦、<em>本日開幕</em>",
         "半年間のランキング上位 <em>9名</em> による FINAL TABLE",
+        "賞品総額 <em>170万円</em>相当 ── 豪華協賛賞品をかけた最終決戦",
         "総チップ <em>1,863,300</em> 点 ── 最後にすべてを積み上げるのは誰だ",
         "開始ブラインド <em>500 / 1,000</em>　1レベル20分",
       ],
@@ -651,6 +678,7 @@ const CONFIG = {
       messages: [
         "<em>9 PLAYERS. 1 TABLE. 1 CHAMPION.</em>",
         "2026年上半期 ファイナルテーブル <em>開催中</em>",
+        "賞品総額 <em>170万円</em>相当の最終決戦",
         "最後にチップを積み上げているのは、<em>誰だ。</em>",
       ],
     },
@@ -912,14 +940,20 @@ const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&l
     $("sb-when").innerHTML = `配信開始　<b class="en">${j.getUTCFullYear()}.${pad(j.getUTCMonth() + 1)}.${pad(j.getUTCDate())} ${WD[j.getUTCDay()]}　${pad(j.getUTCHours())}:${pad(j.getUTCMinutes())}</b>`;
   }
   $("sb-info").innerHTML = SB.info;
-  $("sb-grid").innerHTML = SB.players.map((p, i) => `
-    <div class="pcard" style="--d:${(0.15 + i * 0.07).toFixed(2)}s">
-      ${p.revive ? '<span class="rv">敗者復活</span>' : ""}
-      <span class="no en">${i + 1}</span>
-      <div class="nm">${escHtml(p.name)}</div>
-      <div class="st">${escHtml(p.style)}</div>
-      <div class="ch en goldtxt">${p.chips.toLocaleString("en-US")}<small>pt</small></div>
+  $("sb-prize-v").innerHTML = SB.prize;
+  $("sb-prize").hidden = !SB.prize;
+  $("sb-show").innerHTML = SB.players.map(p => `
+    <div class="sb-slide">
+      <div class="sb-rank"><div class="l en">RANK</div><div class="n en goldtxt">${p.rank}</div></div>
+      <div class="sb-div"></div>
+      <div class="sb-pinfo">
+        ${p.revive ? '<div class="rv">敗者復活</div>' : ""}
+        <div class="nm">${escHtml(p.name)}</div>
+        <div class="st goldtxt">「${escHtml(p.style)}」</div>
+        <div class="ch">持ち込みチップ<b>${p.chips.toLocaleString("en-US")}</b>pt</div>
+      </div>
     </div>`).join("");
+  $("sb-dots").innerHTML = SB.players.map(p => `<span>${p.rank}</span>`).join("");
   const names = CONFIG.sponsors.map(([n, suf]) => `<span>${escHtml(n)}${suf ? " " + suf : ""}</span><i>◆</i>`).join("");
   const track = $("sb-track");
   track.innerHTML = names + names;            // 2周分並べて -50% 動かすと途切れない
@@ -939,14 +973,20 @@ function tickCountdown() {
 }
 tickCountdown();
 setInterval(tickCountdown, 1000);
-// ファイナリストを1人ずつ順に光らせる
-let spot = 0;
-setInterval(() => {
-  if (!body.classList.contains("L-standby")) return;
-  const cards = document.querySelectorAll(".pcard");
-  cards.forEach(c => c.classList.remove("spot"));
-  if (cards.length) cards[spot++ % cards.length].classList.add("spot");
-}, 1800);
+// ファイナリストを1人ずつフェードで入れ替える（ランキング順）
+let showIdx = -1;
+function nextPlayer() {
+  const slides = document.querySelectorAll(".sb-slide");
+  const dots = document.querySelectorAll(".sb-dots span");
+  if (!slides.length) return;
+  const prev = slides[showIdx];
+  if (prev) { prev.classList.remove("on"); prev.classList.add("off"); setTimeout(() => prev.classList.remove("off"), 900); }
+  showIdx = (showIdx + 1) % slides.length;
+  slides[showIdx].classList.add("on");
+  dots.forEach((d, i) => d.classList.toggle("on", i === showIdx));
+}
+nextPlayer();
+setInterval(nextPlayer, SB.rotateMs || 4500);
 
 const cv = $("fx");
 const ctx = cv.getContext("2d");

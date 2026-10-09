@@ -391,13 +391,40 @@
     50%  { transform: translate(900px, 100px); }
     100% { transform: translate(200px, -500px); }
   }
+  /* 大きなスート：漂いながら回り、ときどき金色にほのかに光る */
   .sb-suit {
     position: absolute; font-size: 420px; line-height: 1;
-    color: rgba(231,195,106,.035);
-    animation: drift 40s ease-in-out infinite alternate;
+    color: rgba(231,195,106,.045);
+    animation:
+      drift var(--dur, 22s) ease-in-out infinite alternate,
+      glint 9s ease-in-out infinite;
+    animation-delay: var(--delay, 0s), var(--gdelay, 0s);
   }
-  .sb-suit.r { color: rgba(224,33,63,.035); }
-  @keyframes drift { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-80px) rotate(8deg); } }
+  .sb-suit.r { color: rgba(224,33,63,.045); }
+  @keyframes drift {
+    0%   { transform: translate(0, 0) rotate(-10deg) scale(1); }
+    50%  { transform: translate(var(--dx, 60px), calc(var(--dy, -70px) * .5)) rotate(4deg) scale(1.06); }
+    100% { transform: translate(calc(var(--dx, 60px) * -.4), var(--dy, -70px)) rotate(12deg) scale(.96); }
+  }
+  @keyframes glint {
+    0%, 70%, 100% { text-shadow: none; }
+    82%           { text-shadow: 0 0 40px rgba(231,195,106,.35), 0 0 120px rgba(231,195,106,.18); }
+  }
+  /* 小さなスート：下から上へゆっくり舞い上がる */
+  .sb-float {
+    position: absolute; bottom: -120px; line-height: 1;
+    color: rgba(231,195,106,.10);
+    animation: rise var(--dur, 26s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .sb-float.r { color: rgba(224,33,63,.10); }
+  @keyframes rise {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 1; }
+    50%  { transform: translate(var(--sway, 40px), -620px) rotate(180deg); }
+    90%  { opacity: 1; }
+    100% { transform: translate(calc(var(--sway, 40px) * -.5), -1260px) rotate(360deg); opacity: 0; }
+  }
 
   .sb-head {
     position: absolute; left: 0; right: 0; top: 64px;
@@ -520,10 +547,11 @@
   <div id="standby" aria-hidden="true">
     <div class="sb-beam" style="left:-200px; top:-300px"></div>
     <div class="sb-beam b2" style="left:600px; top:200px"></div>
-    <div class="sb-suit" style="left:60px; top:300px">♠</div>
-    <div class="sb-suit r" style="left:1500px; top:120px; animation-delay:-14s">♥</div>
-    <div class="sb-suit r" style="left:1180px; top:560px; animation-delay:-26s">♦</div>
-    <div class="sb-suit" style="left:520px; top:-120px; animation-delay:-6s">♣</div>
+    <div class="sb-suit" style="left:60px; top:300px; --dur:21s; --dx:70px; --dy:-90px; --gdelay:0s">♠</div>
+    <div class="sb-suit r" style="left:1500px; top:120px; --dur:25s; --dx:-80px; --dy:70px; --delay:-9s; --gdelay:-2.2s">♥</div>
+    <div class="sb-suit r" style="left:1180px; top:560px; --dur:19s; --dx:-60px; --dy:-80px; --delay:-5s; --gdelay:-4.5s">♦</div>
+    <div class="sb-suit" style="left:520px; top:-120px; --dur:27s; --dx:90px; --dy:60px; --delay:-14s; --gdelay:-6.8s">♣</div>
+    <div id="sb-floats"></div>
 
     <div class="sb-head">
       <div class="emblem">
@@ -940,6 +968,18 @@ const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&l
     $("sb-when").innerHTML = `配信開始　<b class="en">${j.getUTCFullYear()}.${pad(j.getUTCMonth() + 1)}.${pad(j.getUTCDate())} ${WD[j.getUTCDay()]}　${pad(j.getUTCHours())}:${pad(j.getUTCMinutes())}</b>`;
   }
   $("sb-info").innerHTML = SB.info;
+  // 小さなスートを横いっぱいに散らす（位置・大きさ・速さ・揺れはばらばらに）
+  const SUITS = ["♠", "♥", "♦", "♣"];
+  $("sb-floats").innerHTML = Array.from({ length: 14 }, (_, i) => {
+    const suit = SUITS[i % 4];
+    const left = Math.round(40 + (1840 / 14) * i + Math.random() * 60);
+    const size = Math.round(36 + Math.random() * 54);
+    const dur = (22 + Math.random() * 16).toFixed(1);
+    const delay = (-Math.random() * 38).toFixed(1);
+    const sway = Math.round((Math.random() - .5) * 140);
+    const red = suit === "♥" || suit === "♦" ? " r" : "";
+    return `<span class="sb-float${red}" style="left:${left}px; font-size:${size}px; --dur:${dur}s; --delay:${delay}s; --sway:${sway}px">${suit}</span>`;
+  }).join("");
   $("sb-prize-v").innerHTML = SB.prize;
   $("sb-prize").hidden = !SB.prize;
   $("sb-show").innerHTML = SB.players.map(p => `

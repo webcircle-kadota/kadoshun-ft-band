@@ -164,7 +164,7 @@
     <section class="preview" aria-label="プレビュー">
       <div class="monitor" id="monitor">
         <img class="ref" id="ref" src="img/ref_hand.jpg" alt="">
-        <iframe id="band" title="FT帯プレビュー" src="overlay.html"></iframe>
+        <iframe id="band" title="FT帯プレビュー"></iframe>
       </div>
       <div class="monitor-bar">
         <span>いまOBSに出している帯：<span class="now" id="now">オープニング</span></span>
@@ -336,6 +336,8 @@
   // ---------- 状態 ----------
   const state = { mode: "pre", name: "", sponsor: true, chips: false };
   const frame = document.getElementById("band");
+  // ブラウザに残った古い帯を出さないよう、開くたびに最新を読み込む
+  frame.src = "overlay.html?v=" + Date.now();
   const monitor = document.getElementById("monitor");
   const ref = document.getElementById("ref");
 

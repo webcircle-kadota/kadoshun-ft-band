@@ -483,7 +483,7 @@
   }
   .sb-slide {
     position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: flex-start; gap: 40px; padding-left: 60px;
+    display: flex; align-items: center; justify-content: center; gap: 40px;
     opacity: 0; transform: translateX(36px); filter: blur(6px);
     transition: opacity .8s ease, transform .9s var(--ease-in), filter .8s ease;
   }
@@ -493,7 +493,8 @@
   .sb-rank .l { font-size: 22px; letter-spacing: .4em; color: var(--muted); padding-left: .4em; }
   .sb-rank .n { display: inline-block; font-size: 128px; font-weight: 700; line-height: 1; }
   .sb-div { width: 2px; height: 140px; flex: none; background: linear-gradient(180deg, transparent, var(--gold-mid), transparent); }
-  .sb-pinfo { width: 1240px; min-width: 0; }
+  /* 情報欄は全員同じ幅（いちばん長い人に合わせる）→ ランクの位置が人によってずれない */
+  .sb-pinfo { width: var(--info-w, 1080px); min-width: 0; }
   .sb-pinfo .line { display: flex; align-items: baseline; gap: 28px; white-space: nowrap; }
   .sb-pinfo .rv { display: inline-block; font-size: 16px; font-weight: 900; letter-spacing: .1em; color: #fff; background: var(--red); padding: 2px 10px; margin-bottom: 6px; }
   .sb-pinfo .nm { font-size: 66px; font-weight: 900; line-height: 1.1; letter-spacing: .04em; white-space: nowrap; }
@@ -866,6 +867,17 @@ function nextSponsor() {
 }
 
 // ---------- 切り替え ----------
+// ファイナリスト欄の幅を、いちばん長い「名前＋プレイスタイル」に合わせる
+function fitShowcase() {
+  const show = $("sb-show");
+  if (!show) return;
+  // scrollWidth は画面の縮小表示の影響を受けない（getBoundingClientRect は受ける）
+  let w = 0;
+  show.querySelectorAll(".sb-pinfo .line, .sb-pinfo .ch").forEach(el => { w = Math.max(w, el.scrollWidth); });
+  const room = show.clientWidth - 220 - 2 - 40 * 2 - 40;   // ランク欄・区切り線・余白
+  show.style.setProperty("--info-w", Math.min(Math.ceil(w), room) + "px");
+}
+
 function setMode(m) {
   if (!CONFIG.modes[m]) return;
   const changedLayout = CONFIG.modes[m].layout !== layoutOf();
@@ -941,6 +953,10 @@ function listenRelay() {
 }
 
 function start() {
+  fitShowcase();
+  // 文字のフォントが後から届くと幅が変わるので測り直す
+  if (document.fonts) document.fonts.addEventListener("loadingdone", fitShowcase);
+  setTimeout(fitShowcase, 1500);
   const d = intro ? 1 : 0;
   // 少し置いてからクラスを付けると、読み込み時にも入場アニメが走る
   // （requestAnimationFrame は埋め込み表示で止まることがあるので setTimeout）

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>FT会 MC台本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  /* 暗い会場で手元のスマホを読む台本：黒地に大きめの白文字、金は見出しと合図だけ。単一のダークテーマ */
+  :root {
+    --bg: #0d0c10;
+    --panel: #17151c;
+    --line: #2c2832;
+    --fg: #f2eee6;
+    --muted: #a39b8e;
+    --gold: #e2bd62;
+    --cue: #3fb7ff;
+    --warn: #ff6b6b;
+    --display: "Oswald", "Arial Narrow", sans-serif;
+    --body: "Noto Sans JP", "Hiragino Sans", "Meiryo", sans-serif;
+    --fs: 19px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 104px); }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: var(--fs); line-height: 1.85; -webkit-text-size-adjust: 100%; }
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: rgba(13,12,16,.96); border-bottom: 1px solid var(--line);
+    padding: 8px 16px 6px;
+  }
+  .bar .row { display: flex; align-items: center; gap: 8px; }
+  .bar h1 { margin: 0; flex: 1; min-width: 0; font-family: var(--display); font-size: 17px; letter-spacing: .1em; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar button { font: inherit; font-size: 14px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; line-height: 1; }
+  .bar button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+  .bar button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .nav { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 2px; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { flex: none; font-size: 13px; line-height: 1; color: var(--fg); text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; }
+  .nav a.on { border-color: var(--gold); color: var(--gold); }
+
+  main { padding-inline: 16px; padding-block: 8px 40vh; max-width: 720px; margin: 0 auto; }
+  .note { color: var(--muted); font-size: .78em; line-height: 1.6; }
+  .sec { padding-top: 14px; }
+  .sec h2 { margin: 18px 0 8px; font-size: 1.05em; line-height: 1.4; color: var(--gold); text-wrap: balance; border-left: 4px solid var(--gold); padding-left: 10px; }
+  p { margin: 0 0 1em; }
+  b { color: #fff; }
+  hr { border: 0; border-top: 1px dashed var(--line); margin: 1.4em 0; }
+  ul, ol { margin: 0 0 1em; padding-left: 1.2em; }
+  li { margin: .2em 0; }
+  .cue { display: inline-block; font-size: .7em; font-weight: 700; letter-spacing: .06em; color: #001a29; background: var(--cue); border-radius: 6px; padding: 2px 8px; line-height: 1.5; vertical-align: .15em; }
+  .chk { display: inline-block; font-size: .68em; font-weight: 700; color: var(--warn); border: 1px solid var(--warn); border-radius: 6px; padding: 0 6px; line-height: 1.5; vertical-align: .15em; }
+  .blank { color: var(--gold); font-weight: 700; }
+  .tbl { overflow-x: auto; margin: 0 0 1em; }
+  table { border-collapse: collapse; font-size: .8em; line-height: 1.55; min-width: 100%; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; white-space: nowrap; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+
+  .pnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 4px 0 18px; }
+  .pnav a { font-size: 13px; color: var(--fg); text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 6px; margin: 0 0 18px; }
+  .player.plain h3 { margin: 0 0 8px; font-size: .95em; color: var(--gold); }
+  .ph { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .rk { flex: none; width: 64px; text-align: center; border-right: 1px solid var(--line); padding-right: 10px; }
+  .rk small { display: block; font-family: var(--display); font-size: 11px; letter-spacing: .3em; color: var(--muted); line-height: 1.2; }
+  .rk b { font-family: var(--display); font-size: 44px; line-height: 1; color: var(--gold); }
+  .who { min-width: 0; }
+  .who .nm { font-size: 1.35em; font-weight: 900; line-height: 1.25; }
+  .who .st { font-size: .85em; font-weight: 700; color: var(--gold); line-height: 1.4; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .stats span { font-size: .7em; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; line-height: 1.6; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+</head>
+<body>
+<div class="bar">
+  <div class="row">
+    <h1>FT会 MC台本</h1>
+    <button id="smaller" aria-label="文字を小さく">A−</button>
+    <button id="bigger" aria-label="文字を大きく">A＋</button>
+    <button id="wake" aria-pressed="false">画面ON</button>
+  </div>
+  <nav class="nav" id="nav"><a href="#s0">0 配信開始</a><a href="#s1">1 オープニング</a><a href="#s2">2 大会概要・賞品・スポンサー紹介</a><a href="#s3">3 選手入場</a><a href="#s4">4 ルール説明</a><a href="#s5">5 ゲーム開始</a><a href="#s6">6 進行中の定型アナウンス</a><a href="#s7">7 優勝決定</a><a href="#s8">8 表彰式</a><a href="#s9">9 ヒーローインタビュー</a><a href="#s10">10 エンディング</a></nav>
+</div>
+
+<main>
+  <p class="note">【帯】はコントロール画面のボタン（OBS帯の場面）。時刻は 11_タイムテーブル の予定。</p><p class="note"><span class="blank">○○</span> は当日入れる。<span class="chk">要確認</span>は事前に決めておくこと。</p>
+  <section class="sec" id="s0"><h2>0. 配信開始（14:15ごろ）<span class="cue">帯 STANDBY</span></h2><p>（BGMのみ。しゃべらない）</p><hr></section><section class="sec" id="s1"><h2>1. オープニング（14:30）<span class="cue">帯 OPENING</span></h2><p>皆さん、こんにちは！<br>カドシュンポーカー倶楽部、<b>2026年上半期 FINAL TABLE</b>、ライブ配信へようこそ！</p><p>本日は、半年間のランキングを戦い抜いた上位6名と、<br>敗者復活戦から最後の切符をつかんだ3名、<br><b>計9名</b>による、上半期チャンピオン決定戦をお届けします。</p><p>この配信では、<b>プレイヤー全員の手札を公開</b>しながら、<br>勝率やゲームの流れもリアルタイムで表示していきます。<br>観ているだけでも、駆け引きの面白さが伝わると思います。<br>コメントでの応援も、ぜひよろしくお願いします！</p><hr></section><section class="sec" id="s2"><h2>2. 大会概要・賞品・スポンサー紹介</h2><p>今回の賞品総額は、なんと <b>170万円相当</b>！<br>協賛企業の皆さまから、豪華な賞品をご提供いただいています。<br>ご紹介します。</p><ul><li><b>オフ・ザ・レコード</b>様 ── 優勝者にスタンダードプラン1年分</li><li><b>株式会社NATURE</b>様 ── 上位3名にショッピング同行1回無料</li><li><b>株式会社BeBe16</b>様 ── 上位5名にゴルフレッスンチケット</li><li><b>株式会社ハースコーポレーション</b>様 ── 上位5名にハーブティとコンディショニング体験チケット</li><li><b>クスノキノ株式会社</b>様 ── 優勝者にリカバリーTシャツと、築103年の古民家ヴィラ 宿泊＋1泊無料券</li><li><b>Victoriafruit株式会社</b>様 ── 上位6名に、マンゴーやせとかなど旬のフルーツ</li><li><b>株式会社ユービリゾート</b>様 ── ファイナリスト全員にくろにんにく</li><li><b>フリート合同会社</b>様 ── 上位5名にお米5kg</li><li><b>NextDeal合同会社</b>様 ── 全員にバウチャー。優勝者にはカドシュンポーカー倶楽部パーカー</li></ul><p>バウチャーは、優勝 <b>10万円</b>、2位 6万円、3位 4万円、4位 3万円、5位 2万5千円、6位 2万円、7位・8位 1万円、9位 5千円です。</p><p>協賛企業の皆さま、本当にありがとうございます！</p><hr></section><section class="sec" id="s3"><h2>3. 選手入場（9位 → 1位）</h2><p>それでは、ファイナリストの入場です！</p>
+<nav class="pnav" aria-label="選手"><a href="#p9">9 Shiori</a><a href="#p8">8 ヤス</a><a href="#p7">7 ペンギンちゃん</a><a href="#p6">6 ぬくみん</a><a href="#p5">5 たぐちまさき</a><a href="#p4">4 サオリ</a><a href="#p3">3 宮嶋先生</a><a href="#p2">2 ジーニョ</a><a href="#p1">1 ハヤト</a></nav>
+<article class="player plain"><h3>オープニング</h3><p>半年間の戦いを経て、この舞台に辿り着いた9人。</p><p>ランキング上位から順当にその座を掴んだ者。<br>敗者復活戦から最後の切符を奪い取った者。</p><p>戦い方も、積み上げてきた数字も、ここまでの物語も違う。</p><p><b>9位から1位へ。</b></p><p>2026年上半期 FINAL TABLE。<br>ファイナリスト9名、入場。</p><hr></article>
+<article class="player" id="p9">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>9</b></div>
+    <div class="who"><div class="nm">Shiori</div><div class="st">「最後まで見届ける迷える張り師」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：4回</span><span>通算増減：-12,600</span><span>勝率：50.0%</span><span>Rank：C</span></div>
+  <p>一度は閉ざされた、FINAL TABLEへの道。</p><p>しかし、ここで物語は終わらなかった。</p><p>残されたわずか3席を争う敗者復活戦。<br>後がないサドンデスを生き残り、ShioriがFINAL TABLEへ帰ってきた。</p><p>そのスタイルは――</p><p><b>「最後まで見届ける迷える張り師」</b></p><p>簡単には結論を出さない。<br>相手のアクションを最後まで見届け、その先にある答えを探し続ける。</p><p>時にその好奇心が危険な領域まで連れていくこともある。</p><p>だが――敗者復活戦を生き残った今、その「最後まで見る力」は侮れない。</p><p>**一度失ったFTへの切符を、自ら取り戻した。<br>ここから先は、失うもののない挑戦者だ。**</p><hr>
+</article>
+<article class="player" id="p8">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>8</b></div>
+    <div class="who"><div class="nm">ヤス</div><div class="st">「煉獄のオールイン狂」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：15回</span><span>通算増減：-549,050</span><span>勝率：21.4%</span><span>Rank：F</span></div>
+  <p>一度はFT圏外へ。</p><p>それでもヤスは、敗者復活戦で再び勝負の席についた。</p><p>リバイなし。<br>3席限定。</p><p>一つのオールインが、生か死かを決めるサドンデス。</p><p>そんな舞台から戻ってきた男のスタイルは――</p><p><b>「煉獄のオールイン狂」</b></p><p>これ以上、敗者復活戦にふさわしい異名があるだろうか。</p><p>チップを守るのではない。<br>勝負所と見れば、自ら炎の中へ飛び込んでいく。</p><p>相手に突きつける選択肢は、ときにたった二つ。</p><p><b>CALLするか。FOLDするか。</b></p><p>敗者復活戦を生き延びたオールイン狂が、今度はFINAL TABLEを燃やしに来る。</p><hr>
+</article>
+<article class="player" id="p7">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>7</b></div>
+    <div class="who"><div class="nm">ペンギンちゃん</div><div class="st">「不死身の勝負師」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：23回</span><span>通算増減：-250,700</span><span>勝率：39.1%</span><span>Rank：E</span></div>
+  <p>一度FTへの道を断たれ――</p><p>それでも戻ってきた。</p><p>敗者復活戦で残された3席の一つを掴み、ペンギンちゃんが再びFINAL TABLEへ。</p><p>新たに与えられたプレイスタイルは、</p><p><b>「不死身の勝負師」</b></p><p>まるで今回のストーリーそのものだ。</p><p>負けても終わらない。<br>追い込まれても消えない。</p><p>そして勝負所が訪れれば、再び前へ出る。</p><p>23戦という経験を重ね、敗者復活戦まで生き抜いて辿り着いた最後の舞台。</p><p>**倒しても、戻ってくる。<br>“不死身”の男を本当に止めることができるのか。**</p><hr>
+</article>
+<article class="player" id="p6">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>6</b></div>
+    <div class="who"><div class="nm">ぬくみん</div><div class="st">「鋼鉄のBB守護神」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：10回</span><span>通算増減：+162,500</span><span>勝率：71.4%</span><span>Rank：B</span></div>
+  <p>今回のFINAL TABLEで、ひときわ目を引く数字。</p><p><b>勝率71.4%。</b></p><p>10戦を戦い、通算収支もプラス。</p><p>そんなぬくみんのスタイルは――</p><p><b>「鋼鉄のBB守護神」</b></p><p>自分のブラインドは、簡単には渡さない。</p><p>スチールを仕掛ける側からすれば、そこに座っているだけで厄介な存在。</p><p>FINAL TABLEではブラインドの価値が時間とともに上昇していく。</p><p>つまりゲームが進むほど、このスタイルの存在感も増していく。</p><p>**奪おうとする者と、守ろうとする者。<br>鋼鉄の守護神が、FTのブラインド戦争を制するか。**</p><hr>
+</article>
+<article class="player" id="p5">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>5</b></div>
+    <div class="who"><div class="nm">たぐちまさき</div><div class="st">「安定基盤のスパイククリエイター」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：4回</span><span>通算増減：+293,100</span><span>勝率：66.7%</span><span>Rank：A</span></div>
+  <p>わずか4戦。</p><p>それでも通算 <b>+293,100</b>、勝率 <b>66.7%</b>、ランクA。</p><p>少ない参戦数から一気に上位へ駆け上がってきた。</p><p>スタイルは――</p><p><b>「安定基盤のスパイククリエイター」</b></p><p>常に暴れ続けるわけではない。</p><p>土台を崩さず、ゲームを組み立て、チャンスが訪れた瞬間に一気に跳ねる。</p><p>その一撃で積み上がったチップは、決して偶然とは言い切れない。</p><p>派手な乱打戦の陰で、静かに機会を待つ。</p><p>そして一度スパイクが立った瞬間――</p><p><b>FINAL TABLEの勢力図が、一気に変わる。</b></p><hr>
+</article>
+<article class="player" id="p4">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>4</b></div>
+    <div class="who"><div class="nm">サオリ</div><div class="st">「最後まで見届ける新進レギュラー」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：49回</span><span>通算増減：-398,850</span><span>勝率：41.5%</span><span>Rank：F</span></div>
+  <p>FTメンバー最多クラスとなる、<b>49回の参戦経験</b>。</p><p>勝った日もあった。<br>苦しい日もあった。</p><p>それでもテーブルに座り続け、半年間を戦い抜いた。</p><p>スタイルは――</p><p><b>「最後まで見届ける新進レギュラー」</b></p><p>途中で簡単に諦めない。</p><p>相手のベット、そのストーリー、そしてショーダウンまで。</p><p>数多くのハンドを経験してきたからこそ持つ、独特の粘り。</p><p>49戦の蓄積は、数字だけでは測れない。</p><p><b>FINAL TABLEという最後の一戦まで見届けるために、サオリが席につく。</b></p><hr>
+</article>
+<article class="player" id="p3">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>3</b></div>
+    <div class="who"><div class="nm">宮嶋先生</div><div class="st">「絶界収益錬金術師」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：16回</span><span>通算増減：+1,265,800</span><span>勝率：62.5%</span><span>Rank：S</span></div>
+  <p>ここからTOP3。</p><p>そして現れるのは、今回のFTで最も圧倒的な実績を持つ一人。</p><p>16戦。</p><p>勝率 <b>62.5%</b>。</p><p>通算収支――</p><p><b>+1,265,800。</b></p><p>最高ランク、<b>S</b>。</p><p>プレイスタイルは、</p><p><b>「絶界収益錬金術師」</b></p><p>チップを持たせれば、さらにチップを生み出す。</p><p>一度優位に立てば、その差を利益へと変換していく。</p><p>派手に見える一つのビッグポットの裏側に、積み重ねられた小さな収益がある。</p><p>偶然の一撃ではない。</p><p><b>数字が証明する、FT屈指の実力者。</b></p><p>優勝候補の一角、宮嶋先生がFINAL TABLEへ。</p><hr>
+</article>
+<article class="player" id="p2">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>2</b></div>
+    <div class="who"><div class="nm">ジーニョ</div><div class="st">「黄金律のベットモンスター」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：14回</span><span>通算増減：+815,050</span><span>勝率：61.5%</span><span>Rank：A</span></div>
+  <p>14戦で <b>+815,050</b>。</p><p>勝率 <b>61.5%</b>。</p><p>ランキング2位まで駆け上がったジーニョ。</p><p>その異名は――</p><p><b>「黄金律のベットモンスター」</b></p><p>ただベットするのではない。</p><p>相手が嫌がるサイズ。<br>相手が迷うタイミング。<br>そして最大の利益を引き出す一手。</p><p>攻撃性と収益性を兼ね備えた、FTでも屈指の危険人物。</p><p>ベットされた相手は考えなければならない。</p><p>これはバリューなのか。</p><p>ブラフなのか。</p><p>それとも――その境界線すら利用されているのか。</p><p><b>黄金律を知るモンスターが、頂点まであと一つ。</b></p><hr>
+</article>
+<article class="player" id="p1">
+  <header class="ph">
+    <div class="rk"><small>RANK</small><b>1</b></div>
+    <div class="who"><div class="nm">ハヤト</div><div class="st">「天秤の調停者」</div></div>
+  </header>
+  <div class="stats"><span>参加回数：38回</span><span>通算増減：-532,000</span><span>勝率：40.6%</span><span>Rank：F</span></div>
+  <p>そして最後に登場するのは――</p><p><b>2026年上半期ランキング1位。</b></p><p>ハヤト。</p><p>38戦。</p><p>半年間、誰よりも長くランキング争いを戦い抜き、最後にこの場所へ辿り着いた。</p><p>新たなプレイスタイルは――</p><p><b>「天秤の調停者」</b></p><p>攻めるか、退くか。</p><p>コールか、フォールドか。</p><p>リスクか、リターンか。</p><p>ポーカーで絶えず突きつけられる二つの選択肢を、天秤にかけ続ける。</p><p>通算収支だけを見れば、決して順風満帆ではなかった。</p><p>それでも半年間のランキングで最後に一番上に名前を残した。</p><p>だからこそ、この舞台に立っている。</p><p>一戦の爆発力ではない。</p><p><b>半年間を戦い続けた結果としての、RANK 1。</b></p><p>9人目。</p><p>最後のプレイヤーが席につく。</p><p><b>上半期ランキング1位――ハヤト。</b></p><hr>
+</article><article class="player plain"><h3>クロージング：そして、9人が揃う。</h3><p>敗者復活戦から蘇った、</p><p><b>「最後まで見届ける迷える張り師」Shiori。</b><br><b>「煉獄のオールイン狂」ヤス。</b><br><b>「不死身の勝負師」ペンギンちゃん。</b></p><p>そこに立ちはだかる、</p><p><b>「鋼鉄のBB守護神」ぬくみん。</b><br><b>「安定基盤のスパイククリエイター」たぐちまさき。</b><br><b>「最後まで見届ける新進レギュラー」サオリ。</b><br><b>「絶界収益錬金術師」宮嶋先生。</b><br><b>「黄金律のベットモンスター」ジーニョ。</b></p><p>そしてランキング1位、</p><p><b>「天秤の調停者」ハヤト。</b></p><p>戦い方も、ここまでの道のりも違う9人。</p><p>しかし、目指す場所は一つ。</p><p>**9 PLAYERS.<br>1 TABLE.<br>1 CHAMPION.**</p><p><b>KADOSHUN POKER CLUB 2026 上半期 FINAL TABLE</b></p><p><b>最後にチップを積み上げているのは、誰だ。</b></p><hr></article></section><section class="sec" id="s4"><h2>4. ルール説明</h2><p>ここで、本日のルールをご説明します。</p><ul><li>各プレイヤーは、<b>上半期に獲得したチップをそのまま持ち込んで</b>スタートします。総チップは <b>1,863,300点</b>です。</li><li>開始ブラインドは <b>500 / 1,000、BBアンティ 1,000</b>。<b>1レベル20分</b>で上がっていきます。</li><li><b>4レベルごとに10分間の休憩</b>があります。</li><li>最後の1人になるまで行い、その方が上半期チャンピオンです。</li><li>同じハンドで2人以上が脱落した場合は、<b>そのハンド開始時のチップが多かった方が上位</b>です。<span class="chk">要確認</span></li><li>配信の都合上、プレイ中の配信画面の視聴はご遠慮ください。<span class="chk">要確認</span></li><li>Lv16（25,000 / 50,000）を過ぎても決着しない場合は、<span class="blank">○○</span> で進めます。（確認：延長ブラインド）</li></ul><hr></section><section class="sec" id="s5"><h2>5. ゲーム開始<span class="cue">帯 LIVE</span></h2><p>それでは参りましょう。<br>2026年上半期 FINAL TABLE ──<br><b>シャッフル・アップ・アンド・ディール！</b></p><hr></section><section class="sec" id="s6"><h2>6. 進行中の定型アナウンス</h2><ul><li><b>レベルアップ</b>：「レベル○に上がります。ブラインド <span class="blank">○○</span> / <span class="blank">○○</span>、BBアンティ <span class="blank">○○</span> です」</li><li><b>休憩</b>：「ここで10分間の休憩に入ります。再開はレベル○、ブラインド <span class="blank">○○</span> / <span class="blank">○○</span> からです」</li><li><b>再開</b>：「休憩明け、レベル○スタートです」</li><li><b>脱落</b>：「ここで <span class="blank">○○</span>さん、<b>第○位</b>でフィニッシュです！ 素晴らしい戦いでした。大きな拍手をお願いします！」</li><li><b>ファイナル3</b>：「残りは3名。ここからは表彰台をかけた戦いです！」</li><li><b>ヘッズアップ</b>：「ついにヘッズアップ！ <span class="blank">○○</span>さん と <span class="blank">○○</span>さん、上半期チャンピオンはこのどちらかです！」</li></ul><hr></section><section class="sec" id="s7"><h2>7. 優勝決定<span class="cue">帯 WINNER（優勝者を選んでから押す）</span></h2><p>決まりましたーーっ！！<br>2026年上半期 FINAL TABLE、チャンピオンは……<br><b><span class="blank">○○</span>さん</b>です！！ おめでとうございます！！</p><p>（拍手・写真撮影。優勝ボードを渡す）</p><hr></section><section class="sec" id="s8"><h2>8. 表彰式<span class="cue">帯 INTERVIEW の前。LIVE のままでよい</span></h2><p>それでは表彰式に移ります。9位の方から順にお呼びします。<br>順位ボードと目録をお渡しします。</p><div class="tbl"><table><thead><tr><th>順位</th><th>名前</th><th>読み上げる賞品</th></tr></thead><tbody><tr><td>第9位</td><td><span class="blank">○○</span>さん</td><td>バウチャー5千円、くろにんにく</td></tr><tr><td>第8位</td><td><span class="blank">○○</span>さん</td><td>バウチャー1万円、くろにんにく</td></tr><tr><td>第7位</td><td><span class="blank">○○</span>さん</td><td>バウチャー1万円、くろにんにく</td></tr><tr><td>第6位</td><td><span class="blank">○○</span>さん</td><td>バウチャー2万円、佐賀県産せとか、くろにんにく</td></tr><tr><td>第5位</td><td><span class="blank">○○</span>さん</td><td>バウチャー2万5千円、BeBe16のゴルフレッスンチケット、ハースコーポレーションのハーブティとコンディショニング体験チケット、佐賀県産せとか、お米5kg、くろにんにく</td></tr><tr><td>第4位</td><td><span class="blank">○○</span>さん</td><td>バウチャー3万円、ほか5位と同じ</td></tr><tr><td>第3位</td><td><span class="blank">○○</span>さん</td><td>バウチャー4万円、NATUREのショッピング同行1回無料、BeBe16のゴルフレッスンチケット、ハースコーポレーションのハーブティとコンディショニング体験チケット、フルーツ詰合せ、お米5kg、くろにんにく</td></tr><tr><td>第2位</td><td><span class="blank">○○</span>さん</td><td>バウチャー6万円、ほか3位と同じ</td></tr><tr><td><b>優勝</b></td><td><span class="blank">○○</span>さん</td><td>バウチャー10万円、オフ・ザ・レコードのスタンダードプラン1年分、カドシュンポーカー倶楽部パーカー、クスノキノのリカバリーTシャツと古民家ヴィラ宿泊＋1泊無料券、NATUREのショッピング同行1回無料、BeBe16のゴルフレッスンチケット、ハースコーポレーションのハーブティとコンディショニング体験チケット、宮崎県産完熟マンゴー2玉、お米5kg、くろにんにく</td></tr></tbody></table></div><p>各順位の読み上げ例：<br>「第○位、<span class="blank">○○</span>さん！ 賞品はバウチャー<span class="blank">○○</span>円、そして<span class="blank">○○</span>様から<span class="blank">○○</span>です。おめでとうございます！」</p><hr></section><section class="sec" id="s9"><h2>9. ヒーローインタビュー<span class="cue">帯 INTERVIEW</span></h2><p>改めまして、チャンピオンの<span class="blank">○○</span>さんです！ おめでとうございます！</p><ol><li>今のお気持ちをお聞かせください。</li><li>今日いちばん印象に残っているハンドは？</li><li>勝負の分かれ目はどこでしたか？</li><li>半年間のランキング戦を振り返って、いかがでしたか？</li><li>下半期に向けて、ひと言お願いします！</li></ol><p>ありがとうございました！ もう一度、チャンピオンに大きな拍手を！</p><hr></section><section class="sec" id="s10"><h2>10. エンディング</h2><p>以上で、カドシュンポーカー倶楽部 2026年上半期 FINAL TABLE は終了です。</p><p>改めて、ご協賛いただいた<br>オフ・ザ・レコード様、株式会社NATURE様、株式会社BeBe16様、株式会社ハースコーポレーション様、クスノキノ株式会社様、Victoriafruit株式会社様、株式会社ユービリゾート様、フリート合同会社様、NextDeal合同会社様、<br>本当にありがとうございました！</p><p>下半期のランキング戦も、すでに始まっています。<br>次の FINAL TABLE で会いましょう！</p><p>配信をご覧いただいた皆さん、ありがとうございました。<br>よろしければ、チャンネル登録と高評価もお願いします。<br>それでは、また次回！</p></section>
+</main>
+
+<script>
+  // 文字の大きさ（この端末に覚えておく）
+  const root = document.documentElement;
+  let fs = 19;
+  try { fs = Number(localStorage.getItem("mc-fs")) || 19; } catch (e) {}
+  const setFs = v => { fs = Math.max(15, Math.min(30, v)); root.style.setProperty("--fs", fs + "px"); try { localStorage.setItem("mc-fs", fs); } catch (e) {} };
+  setFs(fs);
+  document.getElementById("smaller").onclick = () => setFs(fs - 2);
+  document.getElementById("bigger").onclick = () => setFs(fs + 2);
+
+  // 読んでいる間は画面を消さない（対応していない端末では何もしない）
+  let lock = null;
+  const wakeBtn = document.getElementById("wake");
+  async function wakeOn() {
+    try { lock = await navigator.wakeLock.request("screen"); wakeBtn.setAttribute("aria-pressed", "true"); lock.addEventListener("release", () => wakeBtn.setAttribute("aria-pressed", "false")); }
+    catch (e) { wakeBtn.textContent = "画面ON不可"; }
+  }
+  wakeBtn.onclick = () => { if (lock) { lock.release(); lock = null; } else wakeOn(); };
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && wakeBtn.getAttribute("aria-pressed") === "true" && !lock) wakeOn(); });
+
+  // いま読んでいる場面を目次で光らせる
+  const links = [...document.querySelectorAll("#nav a")];
+  const secs = links.map(a => document.querySelector(a.getAttribute("href")));
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => {
+      if (!e.isIntersecting) return;
+      const i = secs.indexOf(e.target);
+      links.forEach((a, j) => a.classList.toggle("on", j === i));
+      links[i] && links[i].scrollIntoView({ inline: "center", block: "nearest" });
+    });
+  }, { rootMargin: "-120px 0px -70% 0px" });
+  secs.forEach(s => s && io.observe(s));
+</script>
+</body>
+</html>

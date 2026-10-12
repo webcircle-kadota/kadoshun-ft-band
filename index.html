@@ -111,6 +111,9 @@
   select, input[type=text], textarea { width: 100%; padding: 10px; background: #0f0e13; border: 1px solid var(--line); }
   textarea { resize: vertical; line-height: 1.6; font: inherit; color: var(--fg); }
   .telop-off { opacity: .45; pointer-events: none; }
+  .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .quick button { font: inherit; font-size: 12.5px; color: var(--muted); background: #0f0e13; border: 1px dashed var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+  .quick button:hover { color: var(--fg); border-color: var(--gold-deep); }
   .row .grow { flex: 1; min-width: 0; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .btn { padding: 9px 12px; background: #1f1c25; border: 1px solid var(--line); cursor: pointer; }
@@ -194,13 +197,19 @@
 
       <section class="card">
         <h2>SPEAKER</h2>
-        <p class="hint" style="margin:0 0 8px">スポンサー欄に、いま話している人の名前を出す。消すとスポンサーの表示に戻る。</p>
-        <div class="row">
-          <input type="text" id="sp-role" list="sp-roles" placeholder="役割（例：解説）" autocomplete="off" style="flex:0 0 7.5em">
-          <input type="text" id="sp-name" list="sp-names" class="grow" placeholder="名前" autocomplete="off">
+        <p class="hint" style="margin:0 0 8px">スポンサー欄に好きな文字を出す（話している人の名前など）。消すとスポンサーの表示に戻る。</p>
+        <label class="field" for="sp-role">上の小さい文字（自由入力・空なら出さない）
+          <input type="text" id="sp-role" placeholder="例：解説" autocomplete="off">
+        </label>
+        <div class="quick" data-target="sp-role">
+          <button type="button">解説</button><button type="button">実況</button><button type="button">MC</button><button type="button">ゲスト</button><button type="button">優勝者</button><button type="button">NOW SPEAKING</button>
         </div>
-        <datalist id="sp-roles"><option value="解説"><option value="実況"><option value="MC"><option value="ゲスト"><option value="優勝者"></datalist>
-        <datalist id="sp-names"><option value="ハヤト"><option value="ジーニョ"><option value="宮嶋先生"><option value="サオリ"><option value="たぐちまさき"><option value="ぬくみん"><option value="ペンギンちゃん"><option value="ヤス"><option value="Shiori"></datalist>
+        <label class="field" for="sp-name" style="margin-top:10px">表示する文字（自由入力）
+          <input type="text" id="sp-name" placeholder="例：ブラフの太陽さん（北海道からリモート参加）" autocomplete="off">
+        </label>
+        <div class="quick" data-target="sp-name">
+          <button type="button">ハヤト</button><button type="button">ジーニョ</button><button type="button">宮嶋先生</button><button type="button">サオリ</button><button type="button">たぐちまさき</button><button type="button">ぬくみん</button><button type="button">ペンギンちゃん</button><button type="button">ヤス</button><button type="button">Shiori</button>
+        </div>
         <div class="row" style="margin-top:8px">
           <button class="btn primary" id="sp-show">表示</button>
           <button class="btn" id="sp-clear">消す</button>
@@ -396,10 +405,15 @@
     ref.src = state.chips ? "img/ref_chips.jpg" : "img/ref_hand.jpg";
     fillTelop();
     document.getElementById("sp-now").textContent = state.speaker
-      ? "表示中：" + (state.speaker.role ? state.speaker.role + "　" : "") + state.speaker.name : "表示中：スポンサー";
+      ? "表示中：" + (state.speaker.role ? state.speaker.role + "／" : "") + state.speaker.name : "表示中：スポンサー";
   }
 
-  // ---------- 話している人 ----------
+  // ---------- 話している人（自由入力。よく使う言葉はボタンで入る） ----------
+  document.querySelectorAll(".quick").forEach(q => q.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const input = document.getElementById(q.dataset.target);
+    input.value = b.textContent; input.focus();
+  }));
   document.getElementById("sp-show").addEventListener("click", () => {
     const name = document.getElementById("sp-name").value.trim();
     if (!name) { document.getElementById("sp-name").focus(); return; }

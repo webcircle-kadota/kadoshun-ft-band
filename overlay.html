@@ -367,6 +367,7 @@
   /* 話している人を出している間は、スポンサー欄を消していても表示する（チップカウント画面用を除く） */
   body.no-sponsor.speaking #f-sponsor, body.no-sponsor.speaking:not(.scene-chips) #c-sponsor { visibility: visible; }
   body.speaking #f-sponsor .cap, body.speaking #c-sponsor .cap { color: var(--gold); letter-spacing: .2em; }
+  body.speaking #f-sponsor .cap:empty, body.speaking #c-sponsor .cap:empty { display: none; }   /* 上の小さい文字が空なら詰める */
 
   /* ================================================================
      待機画面（配信開始前）：画面全体を覆う。透過しない
@@ -886,7 +887,7 @@ function setSpeaker(sp) {
   body.classList.toggle("speaking", !!speaker);
   document.querySelectorAll("#f-sponsor .cap, #c-sponsor .cap").forEach(c => {
     if (c.dataset.orig === undefined) c.dataset.orig = c.innerHTML;
-    c.innerHTML = speaker ? escTelop(speaker.role || "SPEAKER") : c.dataset.orig;
+    c.innerHTML = speaker ? escTelop(speaker.role) : c.dataset.orig;   // 空なら何も出さない
   });
   if (speaker) putName(speaker.name, ""); else nextSponsor();
 }

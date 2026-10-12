@@ -364,6 +364,9 @@
   body.scene-chips .row1 { height: 70px; }
   body.scene-chips #c-sponsor { visibility: hidden; }
   body.no-sponsor #c-sponsor, body.no-sponsor #f-sponsor { visibility: hidden; }
+  /* 話している人を出している間は、スポンサー欄を消していても表示する（チップカウント画面用を除く） */
+  body.no-sponsor.speaking #f-sponsor, body.no-sponsor.speaking:not(.scene-chips) #c-sponsor { visibility: visible; }
+  body.speaking #f-sponsor .cap, body.speaking #c-sponsor .cap { color: var(--gold); letter-spacing: .2em; }
 
   /* ================================================================
      待機画面（配信開始前）：画面全体を覆う。透過しない
@@ -773,6 +776,17 @@ const $ = id => document.getElementById(id);
 const safeName = () => champName.replace(/[<>&]/g, "");
 const layoutOf = () => CONFIG.modes[mode].layout;
 
+// ---------- テロップ（コントロール画面で場面ごとに書き換えられる） ----------
+// telop = { pre: { label: "TODAY", msgs: ["…", "…"] }, live: {…}, … }。無い場面は CONFIG のまま
+let telop = {};
+const escTelop = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const telopHtml = t => escTelop(t).replace(/\*\*(.+?)\*\*/g, "<em>$1</em>");   // **金色**
+function labelOf(m) {
+  const c = telop[mode];
+  return c && typeof c.label === "string" ? c.label : m.label;
+}
+window.FT_CONFIG = CONFIG;   // コントロール画面が元の文言を読むため
+
 // ---------- 見出し・ラベル ----------
 function applyState() {
   const m = CONFIG.modes[mode];
@@ -786,13 +800,13 @@ function applyState() {
     $("f-meta").textContent = isName ? (safeName() || "2026 1ST HALF") : meta;
     $("f-meta").classList.toggle("champ-name", isName && !!safeName());
     const lab = $("f-state").querySelector(".label");
-    lab.textContent = m.label;
+    lab.textContent = labelOf(m);
     lab.classList.remove("flip"); void lab.offsetWidth; lab.classList.add("flip");
   } else {
     $("c-title").textContent = m.title;
     const st = $("c-state");
-    st.hidden = !m.label;
-    st.textContent = m.label;
+    st.hidden = !labelOf(m);
+    st.textContent = labelOf(m);
     st.classList.remove("flip"); void st.offsetWidth; st.classList.add("flip");
   }
 }
@@ -801,7 +815,9 @@ function applyState() {
 let idx = 0, msgTimer = null;
 const current = { full: null, compact: null };
 function messages() {
-  return CONFIG.modes[mode].messages
+  const c = telop[mode];
+  const src = c && Array.isArray(c.msgs) && c.msgs.length ? c.msgs.map(telopHtml) : CONFIG.modes[mode].messages;
+  return src
     .filter(t => champName || !t.includes("{name}"))
     .map(t => t.replace(/\{name\}/g, safeName()));
 }
@@ -826,14 +842,10 @@ function showMsg(html) {
   el.classList.add("in");
   current[which] = el;
 }
-function nextMsg() {
-  const list = messages();
-  if (!list.length) return;
-  showMsg(list[idx % list.length]);
-  idx++;
+function restartTimer(always) {
   clearTimeout(msgTimer);
   document.querySelectorAll(".progress i").forEach(b => { b.style.transition = "none"; b.style.width = "0"; });
-  if (list.length > 1) {
+  if (always || messages().length > 1) {
     const bar = document.querySelector(layoutOf() === "full" ? "#f-lower .progress i" : "#c-msgbox .progress i");
     requestAnimationFrame(() => requestAnimationFrame(() => {
       bar.style.transition = `width ${CONFIG.holdMs}ms linear`;
@@ -842,13 +854,43 @@ function nextMsg() {
     msgTimer = setTimeout(nextMsg, CONFIG.holdMs);
   }
 }
+function nextMsg() {
+  const list = messages();
+  if (!list.length) return;
+  showMsg(list[idx % list.length]);
+  idx++;
+  restartTimer(false);
+}
+// 「今すぐ表示」：1文を割り込ませ、次からいつもの順番に戻る
+function sayNow(text) {
+  showMsg(telopHtml(text));
+  restartTimer(true);
+}
 
 // ---------- スポンサー（両方の帯で同時に回す） ----------
 let spIdx = 0;
 const spCur = new Map();
+// 話している人（コントロール画面で設定）。{ role: "解説", name: "○○" } か null
+let speaker = null;
 function nextSponsor() {
+  if (speaker) return;                     // 話している人を出している間はスポンサーを回さない
   const [name, suffix] = CONFIG.sponsors[spIdx % CONFIG.sponsors.length];
   spIdx++;
+  putName(name, suffix);
+}
+function setSpeaker(sp) {
+  const next = sp && typeof sp === "object" && String(sp.name || "").trim()
+    ? { role: String(sp.role || "").trim(), name: String(sp.name).trim() } : null;
+  if (JSON.stringify(next) === JSON.stringify(speaker)) return;
+  speaker = next;
+  body.classList.toggle("speaking", !!speaker);
+  document.querySelectorAll("#f-sponsor .cap, #c-sponsor .cap").forEach(c => {
+    if (c.dataset.orig === undefined) c.dataset.orig = c.innerHTML;
+    c.innerHTML = speaker ? escTelop(speaker.role || "SPEAKER") : c.dataset.orig;
+  });
+  if (speaker) putName(speaker.name, ""); else nextSponsor();
+}
+function putName(name, suffix) {
   document.querySelectorAll("#f-sponsor .name-wrap, #c-sponsor .name-wrap").forEach(wrap => {
     const old = spCur.get(wrap);
     if (old) {
@@ -899,19 +941,28 @@ addEventListener("keydown", e => {
   if (e.key === "ArrowRight" || e.key === " ") nextMsg();
 });
 // ---------- 外からの指示（コントロール画面） ----------
-// d = { mode, name, sponsor, chips, act }  act: "mode"（場面ボタン）/ "next"（次のメッセージ）/ その他（設定の変更）
+// d = { mode, name, sponsor, chips, telop, speaker, act, text }
+//   act: "mode"（場面ボタン）/ "next"（次のメッセージ）/ "say"（text を今すぐ表示）/ その他（設定の変更）
 function handleCmd(d) {
   if (!d || typeof d !== "object") return;
   if (d.act === "next") { nextMsg(); return; }
   if (typeof d.sponsor === "boolean") body.classList.toggle("no-sponsor", !d.sponsor);
   if (typeof d.chips === "boolean") setScene(d.chips);
+  if ("speaker" in d) setSpeaker(d.speaker);
+  let telopChanged = false;
+  if (d.telop && typeof d.telop === "object") {
+    telopChanged = JSON.stringify(d.telop[mode] || null) !== JSON.stringify(telop[mode] || null);
+    telop = d.telop;
+  }
   const nameChanged = typeof d.name === "string" && d.name !== champName;
   if (typeof d.name === "string") champName = d.name;
   if (d.mode && CONFIG.modes[d.mode] && (d.act === "mode" || d.mode !== mode)) {
     setMode(d.mode);                       // 場面ボタンは同じ場面でも出し直す（紙吹雪など）
-  } else if (nameChanged) {
-    applyState(); idx = 0; nextMsg();      // 優勝者名だけ変わったとき
+  } else if (nameChanged || telopChanged) {
+    applyState(); idx = 0;                 // 優勝者名・テロップだけ変わったとき
+    if (d.act !== "say") nextMsg();
   }
+  if (d.act === "say" && typeof d.text === "string" && d.text.trim()) sayNow(d.text.trim());
 }
 // 同じページ内のプレビュー（コントロール画面の iframe）から
 addEventListener("message", e => {
@@ -928,6 +979,7 @@ function parseRelay(raw) {
   try { const m = JSON.parse(raw); return m.event === "message" ? JSON.parse(m.message) : null; } catch (e) { return null; }
 }
 // 読み込み時：最後に送られた設定を取ってから表示を始める（OBS を再起動しても同じ場面に戻る）
+let restoredSpeaker = null;
 async function restoreFromRelay() {
   if (!topic) return;
   try {
@@ -940,6 +992,8 @@ async function restoreFromRelay() {
         if (typeof d.name === "string") champName = d.name;
         if (typeof d.sponsor === "boolean") body.classList.toggle("no-sponsor", !d.sponsor);
         if (typeof d.chips === "boolean") setScene(d.chips);
+        if (d.telop && typeof d.telop === "object") telop = d.telop;
+        if (d.speaker) restoredSpeaker = d.speaker;
         break;
       }
     }
@@ -962,7 +1016,10 @@ function start() {
   // （requestAnimationFrame は埋め込み表示で止まることがあるので setTimeout）
   setTimeout(applyState, 60);
   setTimeout(nextMsg, 1300 * d);
-  setTimeout(() => { nextSponsor(); setInterval(nextSponsor, CONFIG.sponsorMs); }, 1600 * d);
+  setTimeout(() => {
+    if (restoredSpeaker) setSpeaker(restoredSpeaker); else nextSponsor();
+    setInterval(nextSponsor, CONFIG.sponsorMs);
+  }, 1600 * d);
   if (CONFIG.modes[mode].confetti) setTimeout(celebrate, 1200 * d);
 }
 Promise.all([

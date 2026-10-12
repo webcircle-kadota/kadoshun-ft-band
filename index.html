@@ -108,7 +108,10 @@
   .mode[aria-pressed="true"] small { color: #3b2d10; }
   button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
-  select, input[type=text] { width: 100%; padding: 10px; background: #0f0e13; border: 1px solid var(--line); }
+  select, input[type=text], textarea { width: 100%; padding: 10px; background: #0f0e13; border: 1px solid var(--line); }
+  textarea { resize: vertical; line-height: 1.6; font: inherit; color: var(--fg); }
+  .telop-off { opacity: .45; pointer-events: none; }
+  .row .grow { flex: 1; min-width: 0; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .btn { padding: 9px 12px; background: #1f1c25; border: 1px solid var(--line); cursor: pointer; }
   .btn:hover { border-color: var(--gold-deep); }
@@ -187,6 +190,42 @@
           <button class="btn" id="resend">今の設定をもう一度送る</button>
         </div>
         <p class="log" id="log" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>SPEAKER</h2>
+        <p class="hint" style="margin:0 0 8px">スポンサー欄に、いま話している人の名前を出す。消すとスポンサーの表示に戻る。</p>
+        <div class="row">
+          <input type="text" id="sp-role" list="sp-roles" placeholder="役割（例：解説）" autocomplete="off" style="flex:0 0 7.5em">
+          <input type="text" id="sp-name" list="sp-names" class="grow" placeholder="名前" autocomplete="off">
+        </div>
+        <datalist id="sp-roles"><option value="解説"><option value="実況"><option value="MC"><option value="ゲスト"><option value="優勝者"></datalist>
+        <datalist id="sp-names"><option value="ハヤト"><option value="ジーニョ"><option value="宮嶋先生"><option value="サオリ"><option value="たぐちまさき"><option value="ぬくみん"><option value="ペンギンちゃん"><option value="ヤス"><option value="Shiori"></datalist>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="sp-show">表示</button>
+          <button class="btn" id="sp-clear">消す</button>
+          <span class="hint" id="sp-now" style="margin:0"></span>
+        </div>
+      </section>
+
+      <section class="card" id="telop-card">
+        <h2>TELOP</h2>
+        <div class="sub" style="margin-top:0">いまの場面：<b id="telop-scene">オープニング</b><span id="telop-note"></span></div>
+        <label class="field" for="telop-label" style="margin-top:8px">左のラベル（空にすると出さない）
+          <input type="text" id="telop-label" autocomplete="off">
+        </label>
+        <label class="field" for="telop-msgs" style="margin-top:10px">流す文言（1行に1つ。約9秒ごとに切り替わる。**で囲むと金色）
+          <textarea id="telop-msgs" rows="5"></textarea>
+        </label>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="telop-apply">テロップを反映</button>
+          <button class="btn" id="telop-reset">元に戻す</button>
+        </div>
+        <label class="field" for="say-text" style="margin-top:14px">今すぐ表示（1回だけ割り込み。次からいつもの文言に戻る）</label>
+        <div class="row" style="margin-top:6px">
+          <input type="text" id="say-text" class="grow" autocomplete="off" placeholder="例：まもなく休憩に入ります">
+          <button class="btn primary" id="say-btn">表示</button>
+        </div>
       </section>
 
       <section class="card">
@@ -334,7 +373,7 @@
   }
 
   // ---------- 状態 ----------
-  const state = { mode: "pre", name: "", sponsor: true, chips: false };
+  const state = { mode: "pre", name: "", sponsor: true, chips: false, telop: {}, speaker: null };
   const frame = document.getElementById("band");
   // ブラウザに残った古い帯を出さないよう、開くたびに最新を読み込む
   frame.src = "overlay.html?v=" + Date.now();
@@ -355,12 +394,74 @@
     // 見本の背景：全幅の場面はKADOSHUNのオーバーレイを出さないので隠す
     ref.hidden = !!FULL[state.mode];
     ref.src = state.chips ? "img/ref_chips.jpg" : "img/ref_hand.jpg";
+    fillTelop();
+    document.getElementById("sp-now").textContent = state.speaker
+      ? "表示中：" + (state.speaker.role ? state.speaker.role + "　" : "") + state.speaker.name : "表示中：スポンサー";
   }
+
+  // ---------- 話している人 ----------
+  document.getElementById("sp-show").addEventListener("click", () => {
+    const name = document.getElementById("sp-name").value.trim();
+    if (!name) { document.getElementById("sp-name").focus(); return; }
+    state.speaker = { role: document.getElementById("sp-role").value.trim(), name };
+    render(); send("set");
+  });
+  document.getElementById("sp-clear").addEventListener("click", () => {
+    state.speaker = null;
+    render(); send("set");
+  });
+
+  // ---------- テロップ ----------
+  // 元の文言は帯（プレビューの iframe）の CONFIG から読む。<em>…</em> は **…** で見せる
+  const toStars = h => String(h).replace(/<em>(.*?)<\/em>/g, "**$1**").replace(/<[^>]+>/g, "");
+  function defaultsOf(mode) {
+    let cfg = null;
+    try { cfg = frame.contentWindow.FT_CONFIG; } catch (e) {}
+    const m = cfg && cfg.modes && cfg.modes[mode];
+    return m ? { label: m.label || "", msgs: (m.messages || []).map(toStars) } : { label: "", msgs: [] };
+  }
+  let telopShownFor = null;
+  function fillTelop(force) {
+    const card = document.getElementById("telop-card");
+    const standby = state.mode === "standby";
+    card.classList.toggle("telop-off", standby);
+    document.getElementById("telop-scene").textContent = LABELS[state.mode];
+    document.getElementById("telop-note").textContent = standby ? "（待機画面にテロップはありません）" : (state.telop[state.mode] ? "（書き換え中）" : "");
+    // 入力中は上書きしない（場面が変わったとき・外から変わったときだけ入れ直す）
+    const typing = document.activeElement && ["telop-label", "telop-msgs"].includes(document.activeElement.id);
+    if (!force && typing && telopShownFor === state.mode) return;
+    const t = state.telop[state.mode] || defaultsOf(state.mode);
+    document.getElementById("telop-label").value = t.label || "";
+    document.getElementById("telop-msgs").value = (t.msgs || []).join("\n");
+    telopShownFor = state.mode;
+  }
+  document.getElementById("telop-apply").addEventListener("click", () => {
+    const msgs = document.getElementById("telop-msgs").value.split("\n").map(x => x.trim()).filter(Boolean);
+    state.telop = { ...state.telop, [state.mode]: { label: document.getElementById("telop-label").value.trim(), msgs } };
+    fillTelop(true);
+    send("set");
+  });
+  document.getElementById("telop-reset").addEventListener("click", () => {
+    const t = { ...state.telop }; delete t[state.mode]; state.telop = t;
+    fillTelop(true);
+    send("set");
+  });
+  function say() {
+    const el = document.getElementById("say-text");
+    sayText = el.value.trim();
+    if (!sayText) return;
+    send("say");
+    el.value = "";
+  }
+  document.getElementById("say-btn").addEventListener("click", say);
+  document.getElementById("say-text").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) say(); });
 
   // ---------- 送信 ----------
   const log = document.getElementById("log");
+  let sayText = "";
   async function send(act) {
-    const msg = { type: "ft-band", act, from: CLIENT, mode: state.mode, name: state.name, sponsor: state.sponsor, chips: state.chips };
+    const msg = { type: "ft-band", act, from: CLIENT, mode: state.mode, name: state.name, sponsor: state.sponsor, chips: state.chips, telop: state.telop, speaker: state.speaker };
+    if (act === "say") msg.text = sayText;
     frame.contentWindow && frame.contentWindow.postMessage(msg, "*");   // プレビュー
     log.textContent = "送信中…";
     try {
@@ -422,12 +523,14 @@
         if (typeof d.name === "string") state.name = d.name;
         if (typeof d.sponsor === "boolean") state.sponsor = d.sponsor;
         if (typeof d.chips === "boolean") state.chips = d.chips;
+        if (d.telop && typeof d.telop === "object") state.telop = d.telop;
+        if ("speaker" in d) state.speaker = d.speaker || null;
         break;
       }
     } catch (e) { setConn(false); }
     render();
     // プレビューを今の設定に合わせる
-    const sync = () => frame.contentWindow.postMessage({ type: "ft-band", act: "mode", ...state }, "*");
+    const sync = () => { frame.contentWindow.postMessage({ type: "ft-band", act: "mode", ...state }, "*"); fillTelop(true); };
     if (frame.contentDocument && frame.contentDocument.readyState === "complete") setTimeout(sync, 300);
     else frame.addEventListener("load", () => setTimeout(sync, 300), { once: true });
   }
@@ -445,6 +548,8 @@
         if (d.from === CLIENT) return;            // 自分が送ったものは反映済み
         if (d.act === "next") { frame.contentWindow && frame.contentWindow.postMessage({ type: "ft-band", act: "next" }, "*"); return; }
         Object.assign(state, { mode: LABELS[d.mode] ? d.mode : state.mode, name: d.name ?? state.name, sponsor: d.sponsor ?? state.sponsor, chips: d.chips ?? state.chips });
+        if (d.telop && typeof d.telop === "object") { state.telop = d.telop; telopShownFor = null; }
+        if ("speaker" in d) state.speaker = d.speaker || null;
         render();
         frame.contentWindow && frame.contentWindow.postMessage({ ...d, type: "ft-band" }, "*");   // プレビューも合わせる
       } catch (e) {}

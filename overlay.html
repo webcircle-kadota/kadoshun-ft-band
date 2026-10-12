@@ -6,7 +6,7 @@
 <title>KADOSHUN FT Band</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@700;900&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@700;900&family=Barlow+Condensed:wght@500;700&family=Cormorant+Garamond:wght@600;700&family=Shippori+Mincho:wght@700;800&display=block" rel="stylesheet">
 <!--
   KADOSHUN POKER CLUB  2026上半期 FINAL TABLE  OBS帯（v4）
   画面サイズ 1920 x 1080 / 背景透過 / アニメーション付き
@@ -78,7 +78,7 @@
     color: var(--white);
   }
   #fx { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-  .en { font-family: "Oswald", "Arial Narrow", sans-serif; }
+  .en { font-family: var(--en-font, "Oswald", "Arial Narrow", sans-serif); }
   .goldtxt {
     background: var(--gold-grad);
     -webkit-background-clip: text; background-clip: text;
@@ -532,6 +532,67 @@
   .sb-track i { font-style: normal; color: var(--gold); margin-right: 26px; }
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+  /* ================================================================
+     デザインテンプレ（body[data-theme]）：poker（既定）/ academic（学会）/ agm（株主総会）
+     ================================================================ */
+  .coin .mono { display: none; font-weight: 800; line-height: 1; white-space: nowrap;
+    background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #f-brand .coin .mono { font-size: 46px; }
+  #c-crest .coin .mono { font-size: 27px; }
+  .sb-head .coin .mono { font-size: 48px; }
+  body:not([data-theme="poker"]) .coin .logo-mask { display: none; }
+  body:not([data-theme="poker"]) .coin .mono { display: block; }
+  body:not([data-theme="poker"]) .coin { animation: none; }
+  body:not([data-theme="poker"]) .sb-suit,
+  body:not([data-theme="poker"]) #sb-floats,
+  body:not([data-theme="poker"]) .suits { display: none; }
+  /* スポンサーが無いテンプレは、話している人を出すときだけ欄を出す */
+  body.nosp:not(.speaking) #f-sponsor, body.nosp:not(.speaking) #c-sponsor { visibility: hidden; }
+  body.nosp .sb-sponsor { display: none; }
+  /* 開始時刻が無いときはカウントダウンを出さない */
+  body.nostart .sb-count, body.nostart .sb-when { display: none; }
+
+  /* 学会：紺と青。すっきりした書体、方眼の背景 */
+  body[data-theme="academic"] {
+    --gold-hi: #eaf7ff; --gold: #7cc8f2; --gold-mid: #2f8fd6; --gold-lo: #1a5c99;
+    --gold-grad: linear-gradient(180deg, #eaf7ff 0%, #7cc8f2 40%, #2f8fd6 75%, #1a5c99 100%);
+    --gold-grad-x: linear-gradient(90deg, #1a5c99 0%, #2f8fd6 30%, #c8ecff 50%, #2f8fd6 70%, #1a5c99 100%);
+    --glass: rgba(8, 22, 44, .9); --glass-2: rgba(10, 28, 54, .95);
+    --ink: #04121f; --muted: #a9bed3; --red: #1fae9f;
+    --en-font: "Barlow Condensed", "Arial Narrow", sans-serif;
+  }
+  body[data-theme="academic"] #standby {
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 60%, rgba(30, 100, 180, .38), transparent 75%),
+      repeating-linear-gradient(0deg, rgba(124, 200, 242, .06) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(90deg, rgba(124, 200, 242, .06) 0 1px, transparent 1px 48px),
+      #06101f;
+  }
+
+  /* 株主総会：濃紺とシャンパンゴールド。明朝体、二重の細い額縁、動きは控えめ */
+  body[data-theme="agm"] {
+    --gold-hi: #f7f0dc; --gold: #d6c08f; --gold-mid: #a88d58; --gold-lo: #6e5a33;
+    --gold-grad: linear-gradient(180deg, #f7f0dc 0%, #d6c08f 40%, #a88d58 75%, #6e5a33 100%);
+    --gold-grad-x: linear-gradient(90deg, #6e5a33 0%, #a88d58 30%, #f2e6c6 50%, #a88d58 70%, #6e5a33 100%);
+    --glass: rgba(12, 20, 38, .92); --glass-2: rgba(14, 24, 44, .96);
+    --ink: #0b1222; --muted: #b4b9c6; --red: #8a1f2b;
+    --en-font: "Cormorant Garamond", "Times New Roman", serif;
+  }
+  body[data-theme="agm"] #stage { font-family: "Shippori Mincho", "Yu Mincho", "Noto Serif JP", serif; }
+  body[data-theme="agm"] #standby { background: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(40, 60, 100, .5), transparent 75%), #0a1020; }
+  body[data-theme="agm"] #standby::before, body[data-theme="agm"] #standby::after {
+    content: ""; position: absolute; pointer-events: none; border: 1px solid rgba(214, 192, 143, .45);
+  }
+  body[data-theme="agm"] #standby::before { inset: 26px; }
+  body[data-theme="agm"] #standby::after { inset: 34px; border-color: rgba(214, 192, 143, .2); }
+  body[data-theme="agm"] .sweep::after { display: none; }
+
+  /* 待機画面のリスト：番号の長さで文字の大きさを変える（13:00・第1号など） */
+  .sb-rank .n { white-space: nowrap; }
+  .sb-rank .n.mid { font-size: 76px; }
+  .sb-rank .n.long { font-size: 50px; }
+  .sb-rank .l:empty { display: none; }
+
   /* 優勝の光 */
   #champ-flash {
     position: absolute; inset: 0; opacity: 0; pointer-events: none;
@@ -562,19 +623,19 @@
     <div class="sb-head">
       <div class="emblem">
         <div class="coin">
-          <div class="face front"><div class="logo-mask"></div></div>
+          <div class="face front"><div class="logo-mask"></div><div class="mono" data-b="mono"></div></div>
           <div class="face back"><span class="suit">♠</span></div>
         </div>
       </div>
       <div>
-        <div class="club en">KADOSHUN POKER CLUB</div>
-        <div class="sub"><span class="tag">2026 1H</span><span class="goldtxt">上半期 FINAL TABLE</span></div>
+        <div class="club en" data-b="org">KADOSHUN POKER CLUB</div>
+        <div class="sub"><span class="tag" data-b="tag">2026 1H</span><span class="goldtxt" data-b="sub">上半期 ファイナルテーブル</span></div>
       </div>
     </div>
 
     <div class="sb-center">
-      <div class="sb-soon en">STARTING SOON</div>
-      <div class="sb-title">まもなく配信開始</div>
+      <div class="sb-soon en" data-b="soon">STARTING SOON</div>
+      <div class="sb-title" data-b="sbtitle">まもなく配信開始</div>
       <div><span class="sb-count en goldtxt" id="sb-count">--:--:--</span></div>
       <div class="sb-when" id="sb-when"></div>
       <div class="sb-info" id="sb-info"></div>
@@ -582,13 +643,13 @@
     </div>
 
     <div class="sb-players">
-      <div class="cap en">FINALISTS ─ 9 PLAYERS</div>
+      <div class="cap en" data-b="listCap">FINALISTS ─ 9 PLAYERS</div>
       <div class="sb-show" id="sb-show"></div>
       <div class="sb-dots en" id="sb-dots"></div>
     </div>
 
     <div class="sb-sponsor">
-      <div class="lbl en">SPONSORED BY</div>
+      <div class="lbl en" data-b="capFull">SPONSORED BY</div>
       <div class="sb-marquee"><div class="sb-track" id="sb-track"></div></div>
     </div>
   </div>
@@ -598,13 +659,13 @@
     <div id="f-brand" class="part sweep" data-zone="full-brand">
       <div class="emblem">
         <div class="coin">
-          <div class="face front"><div class="logo-mask"></div></div>
+          <div class="face front"><div class="logo-mask"></div><div class="mono" data-b="mono"></div></div>
           <div class="face back"><span class="suit">♠</span></div>
         </div>
       </div>
       <div class="brand-text">
-        <div class="club en">KADOSHUN POKER CLUB</div>
-        <div class="sub"><span class="tag">2026 1H</span><span class="goldtxt">上半期 ファイナルテーブル</span></div>
+        <div class="club en" data-b="org">KADOSHUN POKER CLUB</div>
+        <div class="sub"><span class="tag" data-b="tag">2026 1H</span><span class="goldtxt" data-b="sub">上半期 ファイナルテーブル</span></div>
       </div>
       <div class="rule"></div>
     </div>
@@ -622,7 +683,7 @@
       <div id="f-state" class="sweep"><span class="label en">TODAY</span></div>
       <div id="f-msgbox" class="msgbox sweep"><div class="rule-t"></div><div class="rule-b"></div></div>
       <div id="f-sponsor">
-        <div class="cap en">SPONSORED BY</div>
+        <div class="cap en" data-b="capFull">SPONSORED BY</div>
         <div class="name-wrap"></div>
       </div>
       <div class="progress"><i></i></div>
@@ -636,13 +697,13 @@
         <div class="row1">
           <div class="emblem">
             <div class="coin">
-              <div class="face front"><div class="logo-mask"></div></div>
+              <div class="face front"><div class="logo-mask"></div><div class="mono" data-b="mono"></div></div>
               <div class="face back"><span class="suit">♠</span></div>
             </div>
           </div>
           <div id="c-title" class="en goldtxt">FINAL TABLE</div>
           <div class="divider"></div>
-          <div class="season"><span class="y en">2026</span><span class="h">上半期</span></div>
+          <div class="season"><span class="y en" data-b="tag">2026 1H</span><span class="h" data-b="short">上半期</span></div>
           <div id="c-state" class="en">WINNER</div>
         </div>
         <div id="c-msgbox" class="msgbox"><div class="progress"><i></i></div></div>
@@ -651,7 +712,7 @@
     </div>
 
     <div id="c-sponsor" class="part sweep" data-zone="sponsor">
-      <div class="cap en">SPONSORED<br>BY</div>
+      <div class="cap en" data-b="capCompact">SPONSORED<br>BY</div>
       <div class="name-wrap"></div>
     </div>
   </div>
@@ -754,7 +815,113 @@ const CONFIG = {
 };
 // ======================================================================
 
+// ================= デザインテンプレ =================
+// poker は上の CONFIG をそのまま使う。academic / agm は CONFIG の上に重ねる文言と設定
+// （○○ はコントロール画面の「デザイン」欄やテロップで書き換える前提）
+const THEMES = {
+  poker: {
+    name: "ポーカー", decor: true,
+    brand: { org: "KADOSHUN POKER CLUB", tag: "2026 1H", sub: "上半期 ファイナルテーブル", short: "上半期", mono: "K" },
+    caps: ["SPONSORED BY", "SPONSORED<br>BY"],
+    scenes: { standby: "待機画面", pre: "オープニング", live: "対戦中", champion: "優勝決定", interview: "インタビュー" },
+    nameLabel: "優勝者",
+    modes: {},
+    standby: null,     // CONFIG.standby を使う
+  },
+  academic: {
+    name: "学会", decor: false,
+    brand: { org: "第○回 ○○学会 学術大会", tag: "2026", sub: "Annual Meeting", short: "学術大会", mono: "学" },
+    caps: ["SUPPORTED BY", "SUPPORTED<br>BY"],
+    scenes: { standby: "開始前", pre: "開会", live: "発表中", champion: "表彰", interview: "閉会" },
+    nameLabel: "受賞者・演者",
+    sponsors: [],
+    modes: {
+      pre:       { title: "OPENING", label: "WELCOME", meta: "ANNUAL MEETING", messages: ["まもなく<em>開会</em>いたします", "会場・オンラインの皆さま、ご参加ありがとうございます", "質疑応答は各講演の終了後に受け付けます"] },
+      live:      { title: "SESSION", label: "", messages: ["<em>発表中</em>", "ご質問はチャット欄でも受け付けています", "次の講演は ○○:○○ からです"] },
+      champion:  { title: "AWARD", label: "AWARD", confetti: false, messages: ["<em>{name}</em>　受賞おめでとうございます", "優秀発表賞 表彰"] },
+      interview: { title: "CLOSING", label: "CLOSING", meta: "THANK YOU", confetti: false, messages: ["以上をもちまして本日のプログラムを<em>終了</em>いたします", "ご参加いただき、ありがとうございました"] },
+    },
+    standby: {
+      soon: "STARTING SOON", title: "まもなく開始します", startLabel: "開始",
+      info: "会場：○○ ／ オンライン同時配信", prize: "",
+      listCap: "PROGRAM", listLabel: "TIME", start: "",
+      items: [
+        { no: "13:00", name: "開会挨拶", sub: "大会長 ○○ ○○" },
+        { no: "13:10", name: "基調講演", sub: "○○大学 ○○ ○○ 教授" },
+        { no: "14:30", name: "一般演題 セッション1", sub: "座長 ○○ ○○" },
+        { no: "16:00", name: "シンポジウム", sub: "「○○の未来」" },
+        { no: "17:30", name: "表彰式・閉会", sub: "" },
+      ],
+    },
+  },
+  agm: {
+    name: "株主総会", decor: false,
+    brand: { org: "株式会社○○○○", tag: "第○期", sub: "定時株主総会", short: "定時株主総会", mono: "株" },
+    caps: ["", ""],
+    scenes: { standby: "開会前", pre: "開会", live: "議事進行中", champion: "決議", interview: "閉会" },
+    nameLabel: "議案名",
+    sponsors: [],
+    modes: {
+      pre:       { title: "GENERAL MEETING", label: "開会", meta: "ANNUAL GENERAL MEETING", messages: ["ただいまより、<em>定時株主総会</em>を開会いたします", "本日はご出席いただき、誠にありがとうございます"] },
+      live:      { title: "MEETING", label: "", messages: ["<em>議事進行中</em>", "ご質問は質疑応答の時間にお受けいたします"] },
+      champion:  { title: "RESOLUTION", label: "決議", confetti: false, messages: ["<em>{name}</em>は原案どおり承認可決されました"] },
+      interview: { title: "CLOSING", label: "閉会", meta: "", confetti: false, messages: ["以上をもちまして、本総会を<em>終了</em>いたします", "ご出席いただき、誠にありがとうございました"] },
+    },
+    standby: {
+      soon: "PLEASE WAIT", title: "まもなく開会いたします", startLabel: "開会",
+      info: "開会まで今しばらくお待ちください", prize: "",
+      listCap: "AGENDA", listLabel: "", start: "",
+      items: [
+        { no: "報告", name: "第○期 事業報告・計算書類の内容報告の件", sub: "報告事項" },
+        { no: "第1号", name: "剰余金の処分の件", sub: "決議事項" },
+        { no: "第2号", name: "取締役○名選任の件", sub: "決議事項" },
+        { no: "第3号", name: "監査役○名選任の件", sub: "決議事項" },
+      ],
+    },
+  },
+};
+let theme = "poker";
+let design = {};        // コントロール画面の「デザイン」欄で書き換えた内容
+const TH = () => THEMES[theme] || THEMES.poker;
+// 場面の設定：レイアウトは CONFIG のまま、文言はテンプレで上書き
+function M(m) { m = m || mode; return { ...CONFIG.modes[m], ...((TH().modes || {})[m] || {}) }; }
+function sponsorsList() { return TH().sponsors || CONFIG.sponsors; }
+function themeBrand(th) {
+  const t = THEMES[th] || THEMES.poker;
+  return { ...t.brand };
+}
+function brand() {
+  const b = themeBrand(theme), d = design.brand || {};
+  for (const k in d) if (typeof d[k] === "string" && d[k].trim()) b[k] = d[k].trim();
+  return b;
+}
+// 待機画面の中身（テンプレ既定 → デザイン欄の上書き）
+function standbyDefaults(th) {
+  const t = THEMES[th] || THEMES.poker;
+  if (t.standby) return { ...t.standby, items: t.standby.items.slice() };
+  const c = CONFIG.standby;
+  return {
+    soon: "STARTING SOON", title: "まもなく配信開始", startLabel: "配信開始",
+    info: c.info, prize: c.prize, listCap: "FINALISTS ─ 9 PLAYERS", listLabel: "RANK", start: c.start,
+    items: c.players.map(p => ({ no: String(p.rank), name: p.name, sub: p.style, chips: p.chips, revive: !!p.revive })),
+  };
+}
+function standbyCfg() {
+  const s = standbyDefaults(theme), d = design;
+  if (typeof d.sbTitle === "string" && d.sbTitle.trim()) s.title = d.sbTitle.trim();
+  if (typeof d.info === "string" && d.info.trim()) s.info = escTelopEarly(d.info.trim()).replace(/\*\*(.+?)\*\*/g, "<em>$1</em>");
+  if (typeof d.listCap === "string" && d.listCap.trim()) s.listCap = d.listCap.trim();
+  if (Array.isArray(d.items) && d.items.length) s.items = d.items;
+  if (typeof d.start === "string") s.start = d.start;
+  return s;
+}
+function escTelopEarly(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+window.FT_THEMES = THEMES;
+window.FT_effective = (th, m) => ({ ...CONFIG.modes[m], ...(((THEMES[th] || {}).modes || {})[m] || {}) });
+window.FT_standby = standbyDefaults;
+
 const params = new URLSearchParams(location.search);
+if (THEMES[params.get("theme")]) theme = params.get("theme");   // ?theme=academic / agm（確認用）
 let mode = CONFIG.modes[params.get("mode")] ? params.get("mode") : "pre";
 let champName = params.get("name") || "";
 const body = document.body;
@@ -790,7 +957,7 @@ window.FT_CONFIG = CONFIG;   // コントロール画面が元の文言を読む
 
 // ---------- 見出し・ラベル ----------
 function applyState() {
-  const m = CONFIG.modes[mode];
+  const m = M();
   body.classList.toggle("L-full", m.layout === "full");
   body.classList.toggle("L-compact", m.layout === "compact");
   body.classList.toggle("L-standby", m.layout === "standby");
@@ -817,7 +984,7 @@ let idx = 0, msgTimer = null;
 const current = { full: null, compact: null };
 function messages() {
   const c = telop[mode];
-  const src = c && Array.isArray(c.msgs) && c.msgs.length ? c.msgs.map(telopHtml) : CONFIG.modes[mode].messages;
+  const src = c && Array.isArray(c.msgs) && c.msgs.length ? c.msgs.map(telopHtml) : (M().messages || []);
   return src
     .filter(t => champName || !t.includes("{name}"))
     .map(t => t.replace(/\{name\}/g, safeName()));
@@ -875,7 +1042,9 @@ const spCur = new Map();
 let speaker = null;
 function nextSponsor() {
   if (speaker) return;                     // 話している人を出している間はスポンサーを回さない
-  const [name, suffix] = CONFIG.sponsors[spIdx % CONFIG.sponsors.length];
+  const list = sponsorsList();
+  if (!list.length) return;
+  const [name, suffix] = list[spIdx % list.length];
   spIdx++;
   putName(name, suffix);
 }
@@ -885,12 +1054,21 @@ function setSpeaker(sp) {
   if (JSON.stringify(next) === JSON.stringify(speaker)) return;
   speaker = next;
   body.classList.toggle("speaking", !!speaker);
-  document.querySelectorAll("#f-sponsor .cap, #c-sponsor .cap").forEach(c => {
-    if (c.dataset.orig === undefined) c.dataset.orig = c.innerHTML;
-    c.innerHTML = speaker ? escTelop(speaker.role) : c.dataset.orig;   // 空なら何も出さない
-  });
-  if (speaker) putName(speaker.name, ""); else nextSponsor();
+  renderCaps();
+  if (speaker) putName(speaker.name, ""); else { clearNames(); nextSponsor(); }
 }
+function renderCaps() {
+  const caps = TH().caps || CONFIG_CAPS;
+  document.querySelectorAll('[data-b="capFull"], [data-b="capCompact"]').forEach(c => {
+    const inSlot = c.closest("#f-sponsor, #c-sponsor");
+    c.innerHTML = speaker && inSlot ? escTelop(speaker.role) : (c.dataset.b === "capFull" ? caps[0] : caps[1]);   // 空なら何も出さない
+  });
+}
+function clearNames() {
+  spCur.forEach(el => { el.classList.remove("in"); el.classList.add("out"); el.addEventListener("animationend", () => el.remove(), { once: true }); });
+  spCur.clear();
+}
+const CONFIG_CAPS = ["SPONSORED BY", "SPONSORED<br>BY"];
 function putName(name, suffix) {
   document.querySelectorAll("#f-sponsor .name-wrap, #c-sponsor .name-wrap").forEach(wrap => {
     const old = spCur.get(wrap);
@@ -919,6 +1097,12 @@ function fitShowcase() {
   show.querySelectorAll(".sb-pinfo .line, .sb-pinfo .ch").forEach(el => { w = Math.max(w, el.scrollWidth); });
   const room = show.clientWidth - 220 - 2 - 40 * 2 - 40;   // ランク欄・区切り線・余白
   show.style.setProperty("--info-w", Math.min(Math.ceil(w), room) + "px");
+  // それでも入りきらない行（長い議案名など）は横に詰める
+  const infoW = Math.min(Math.ceil(w), room);
+  show.querySelectorAll(".sb-pinfo .line").forEach(el => {
+    el.style.transform = el.scrollWidth > infoW ? `scaleX(${(infoW / el.scrollWidth).toFixed(3)})` : "";
+    el.style.transformOrigin = "0 50%";
+  });
 }
 
 function setMode(m) {
@@ -929,7 +1113,7 @@ function setMode(m) {
   // レイアウトが変わるときは入れ替わりを待ってからメッセージを出す
   clearTimeout(msgTimer);
   setTimeout(nextMsg, changedLayout && intro ? 700 : 0);
-  if (CONFIG.modes[m].confetti) celebrate();
+  if (M(m).confetti) celebrate();
 }
 function setScene(chips) { body.classList.toggle("scene-chips", chips); }
 addEventListener("keydown", e => {
@@ -949,6 +1133,15 @@ function handleCmd(d) {
   if (d.act === "next") { nextMsg(); return; }
   if (typeof d.sponsor === "boolean") body.classList.toggle("no-sponsor", !d.sponsor);
   if (typeof d.chips === "boolean") setScene(d.chips);
+  if (d.design && typeof d.design === "object") {
+    const changed = JSON.stringify(d.design) !== JSON.stringify(design);
+    design = d.design;
+    theme = THEMES[design.theme] ? design.theme : "poker";
+    if (changed) {
+      applyDesign();
+      if (d.act !== "mode" && d.act !== "say") { applyState(); idx = 0; nextMsg(); }
+    }
+  }
   if ("speaker" in d) setSpeaker(d.speaker);
   let telopChanged = false;
   if (d.telop && typeof d.telop === "object") {
@@ -995,6 +1188,7 @@ async function restoreFromRelay() {
         if (typeof d.chips === "boolean") setScene(d.chips);
         if (d.telop && typeof d.telop === "object") telop = d.telop;
         if (d.speaker) restoredSpeaker = d.speaker;
+        if (d.design && typeof d.design === "object") { design = d.design; theme = THEMES[design.theme] ? design.theme : "poker"; }
         break;
       }
     }
@@ -1008,6 +1202,7 @@ function listenRelay() {
 }
 
 function start() {
+  applyDesign();
   fitShowcase();
   // 文字のフォントが後から届くと幅が変わるので測り直す
   if (document.fonts) document.fonts.addEventListener("loadingdone", fitShowcase);
@@ -1021,7 +1216,7 @@ function start() {
     if (restoredSpeaker) setSpeaker(restoredSpeaker); else nextSponsor();
     setInterval(nextSponsor, CONFIG.sponsorMs);
   }, 1600 * d);
-  if (CONFIG.modes[mode].confetti) setTimeout(celebrate, 1200 * d);
+  if (M().confetti) setTimeout(celebrate, 1200 * d);
 }
 Promise.all([
   document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve(),
@@ -1031,18 +1226,63 @@ Promise.all([
 // ---------- 光の粒・紙吹雪 ----------
 // ---------- 待機画面 ----------
 const SB = CONFIG.standby;
-// start= は日本時間として読む（タイムゾーン指定があればそれに従う）
+// 開始時刻は日本時間として読む（タイムゾーン指定があればそれに従う）。URL の start= がいちばん優先
 const startParam = params.get("start");
-const startAt = new Date(startParam ? (/(Z|[+-]\d\d:?\d\d)$/i.test(startParam) ? startParam : startParam + "+09:00") : SB.start);
+const toDate = v => v ? new Date(/(Z|[+-]\d\d:?\d\d)$/i.test(v) ? v : v + (v.length <= 16 ? ":00+09:00" : "+09:00")) : new Date(NaN);
+let startAt = toDate(startParam || SB.start);
 const WD = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-(function buildStandby() {
+// テンプレ・デザイン欄の内容を画面の文字に反映し、待機画面を作り直す
+function setB(key, text) { document.querySelectorAll(`[data-b="${key}"]`).forEach(el => { el.textContent = text || ""; }); }
+function applyDesign() {
+  body.dataset.theme = theme;
+  const b = brand();
+  setB("org", b.org); setB("tag", b.tag); setB("sub", b.sub); setB("short", b.short); setB("mono", b.mono);
+  body.classList.toggle("nosp", !sponsorsList().length);
+  renderCaps();
+  if (!speaker) { clearNames(); nextSponsor(); }
+  buildStandby();
+  tickCountdown();
+  fitShowcase();
+}
+function buildStandby() {
+  const sb = standbyCfg();
+  setB("soon", sb.soon); setB("sbtitle", sb.title); setB("listCap", sb.listCap);
+  startAt = toDate(startParam || sb.start);
+  body.classList.toggle("nostart", isNaN(startAt));
   if (!isNaN(startAt)) {
     const j = new Date(startAt.getTime() + 9 * 3600e3);   // 表示は日本時間
     const pad = n => String(n).padStart(2, "0");
-    $("sb-when").innerHTML = `配信開始　<b class="en">${j.getUTCFullYear()}.${pad(j.getUTCMonth() + 1)}.${pad(j.getUTCDate())} ${WD[j.getUTCDay()]}　${pad(j.getUTCHours())}:${pad(j.getUTCMinutes())}</b>`;
+    $("sb-when").innerHTML = `${escHtml(sb.startLabel || "開始")}　<b class="en">${j.getUTCFullYear()}.${pad(j.getUTCMonth() + 1)}.${pad(j.getUTCDate())} ${WD[j.getUTCDay()]}　${pad(j.getUTCHours())}:${pad(j.getUTCMinutes())}</b>`;
   }
-  $("sb-info").innerHTML = SB.info;
+  $("sb-info").innerHTML = sb.info || "";
+  $("sb-prize-v").innerHTML = sb.prize || "";
+  $("sb-prize").style.display = sb.prize ? "" : "none";   // hidden だと inline-flex に負けるので直接消す
+  const poker = theme === "poker";
+  // 番号の見た目の幅（全角は2、半角は1）で文字の大きさを決める
+  const numCls = no => { const w = [...String(no)].reduce((a, c) => a + (c.charCodeAt(0) > 0xff ? 2 : 1), 0); return w <= 2 ? "" : w <= 5 ? " mid" : " long"; };
+  $("sb-show").innerHTML = sb.items.map(p => `
+    <div class="sb-slide">
+      <div class="sb-rank"><div class="l en">${escHtml(sb.listLabel || "")}</div><div class="n en goldtxt${numCls(p.no)}">${escHtml(p.no || "")}</div></div>
+      <div class="sb-div"></div>
+      <div class="sb-pinfo">
+        ${poker && p.revive ? '<div class="rv">敗者復活</div>' : ""}
+        <div class="line">
+          <div class="nm">${escHtml(p.name || "")}</div>
+          ${p.sub ? `<div class="st goldtxt">${poker ? "「" + escHtml(p.sub) + "」" : escHtml(p.sub)}</div>` : ""}
+        </div>
+        ${poker && p.chips ? `<div class="ch">持ち込みチップ<b>${Number(p.chips).toLocaleString("en-US")}</b>pt</div>` : ""}
+      </div>
+    </div>`).join("");
+  $("sb-dots").innerHTML = sb.items.map((p, i) => `<span>${poker ? escHtml(p.no) : i + 1}</span>`).join("");
+  showIdx = -1; nextPlayer();
+  const list = sponsorsList();
+  const names = list.map(([n, suf]) => `<span>${escHtml(n)}${suf ? " " + suf : ""}</span><i>◆</i>`).join("");
+  const track = $("sb-track");
+  track.innerHTML = names + names;            // 2周分並べて -50% 動かすと途切れない
+  track.style.setProperty("--dur", Math.max(30, list.length * 7) + "s");
+}
+(function buildFloats() {
   // 小さなスートを横いっぱいに散らす（位置・大きさ・速さ・揺れはばらばらに）
   const SUITS = ["♠", "♥", "♦", "♣"];
   $("sb-floats").innerHTML = Array.from({ length: 14 }, (_, i) => {
@@ -1055,26 +1295,6 @@ const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&l
     const red = suit === "♥" || suit === "♦" ? " r" : "";
     return `<span class="sb-float${red}" style="left:${left}px; font-size:${size}px; --dur:${dur}s; --delay:${delay}s; --sway:${sway}px">${suit}</span>`;
   }).join("");
-  $("sb-prize-v").innerHTML = SB.prize;
-  $("sb-prize").hidden = !SB.prize;
-  $("sb-show").innerHTML = SB.players.map(p => `
-    <div class="sb-slide">
-      <div class="sb-rank"><div class="l en">RANK</div><div class="n en goldtxt">${p.rank}</div></div>
-      <div class="sb-div"></div>
-      <div class="sb-pinfo">
-        ${p.revive ? '<div class="rv">敗者復活</div>' : ""}
-        <div class="line">
-          <div class="nm">${escHtml(p.name)}</div>
-          <div class="st goldtxt">「${escHtml(p.style)}」</div>
-        </div>
-        <div class="ch">持ち込みチップ<b>${p.chips.toLocaleString("en-US")}</b>pt</div>
-      </div>
-    </div>`).join("");
-  $("sb-dots").innerHTML = SB.players.map(p => `<span>${p.rank}</span>`).join("");
-  const names = CONFIG.sponsors.map(([n, suf]) => `<span>${escHtml(n)}${suf ? " " + suf : ""}</span><i>◆</i>`).join("");
-  const track = $("sb-track");
-  track.innerHTML = names + names;            // 2周分並べて -50% 動かすと途切れない
-  track.style.setProperty("--dur", Math.max(30, CONFIG.sponsors.length * 7) + "s");
 })();
 function tickCountdown() {
   const el = $("sb-count");
@@ -1084,14 +1304,14 @@ function tickCountdown() {
     el.classList.add("done");
     return;
   }
-  const h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), sec = left % 60;
-  el.textContent = [h, m, sec].map(n => String(n).padStart(2, "0")).join(":");
+  const days = Math.floor(left / 86400), h = Math.floor(left % 86400 / 3600), m = Math.floor(left % 3600 / 60), sec = left % 60;
+  const hms = [h, m, sec].map(n => String(n).padStart(2, "0")).join(":");
+  el.textContent = days ? `${days}日 ${hms}` : hms;   // 1日以上先なら日数を付ける
   el.classList.remove("done");
 }
-tickCountdown();
 setInterval(tickCountdown, 1000);
-// ファイナリストを1人ずつフェードで入れ替える（ランキング順）
-let showIdx = -1;
+// ファイナリスト（プログラム・議案）を1つずつフェードで入れ替える
+var showIdx = -1;
 function nextPlayer() {
   const slides = document.querySelectorAll(".sb-slide");
   const dots = document.querySelectorAll(".sb-dots span");
@@ -1102,8 +1322,8 @@ function nextPlayer() {
   slides[showIdx].classList.add("on");
   dots.forEach((d, i) => d.classList.toggle("on", i === showIdx));
 }
-nextPlayer();
 setInterval(nextPlayer, SB.rotateMs || 4500);
+applyDesign();                              // 読み込み時の文字（テンプレ既定）
 
 const cv = $("fx");
 const ctx = cv.getContext("2d");
@@ -1145,6 +1365,7 @@ function celebrate() {
   const full = layoutOf() === "full";
   flash.style.setProperty("--fy", full ? "100%" : "0%");
   flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+  if (!TH().decor) return;                  // ポーカー以外は光だけ（紙吹雪なし）
   for (let i = 0; i < 300; i++) {
     const left = i % 2 === 0;
     P.push(full ? {
@@ -1165,7 +1386,7 @@ function celebrate() {
 function frame() {
   ctx.clearRect(0, 0, 1920, 1080);
   const cap = layoutOf() === "standby" ? 160 : layoutOf() === "full" ? 120 : 60;
-  if (sparksOn && P.length < cap && Math.random() < .45) spark();
+  if (sparksOn && TH().decor && P.length < cap && Math.random() < .45) spark();
   for (let i = P.length - 1; i >= 0; i--) {
     const p = P[i];
     p.life++;

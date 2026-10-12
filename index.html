@@ -111,6 +111,16 @@
   select, input[type=text], textarea { width: 100%; padding: 10px; background: #0f0e13; border: 1px solid var(--line); }
   textarea { resize: vertical; line-height: 1.6; font: inherit; color: var(--fg); }
   .telop-off { opacity: .45; pointer-events: none; }
+  .design { grid-column: 1 / -1; }
+  .dgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-top: 12px; }
+  .dgrid .full { grid-column: 1 / -1; }
+  @media (max-width: 700px) { .dgrid { grid-template-columns: minmax(0, 1fr); } }
+  .themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .themes button { font: inherit; color: var(--fg); background: #1f1c25; border: 1px solid var(--line); padding: 10px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .themes button b { font-size: 15px; }
+  .themes button small { font-size: 11.5px; color: var(--muted); }
+  .themes button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+  .themes button i { width: 46px; height: 8px; border-radius: 4px; }
   .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .quick button { font: inherit; font-size: 12.5px; color: var(--muted); background: #0f0e13; border: 1px dashed var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
   .quick button:hover { color: var(--fg); border-color: var(--gold-deep); }
@@ -182,11 +192,11 @@
       <section class="card">
         <h2>SCENE</h2>
         <div class="modes" role="group" aria-label="場面">
-          <button class="mode wide" data-mode="standby" aria-pressed="false"><b>STANDBY</b><small>配信開始前の待機画面（画面全体）</small></button>
-          <button class="mode" data-mode="pre" aria-pressed="true"><b>OPENING</b><small>オープニング・全幅</small></button>
-          <button class="mode" data-mode="live" aria-pressed="false"><b>LIVE</b><small>対戦中・コンパクト</small></button>
-          <button class="mode" data-mode="champion" aria-pressed="false"><b>WINNER</b><small>優勝決定・コンパクト</small></button>
-          <button class="mode" data-mode="interview" aria-pressed="false"><b>INTERVIEW</b><small>インタビュー・全幅</small></button>
+          <button class="mode wide" data-mode="standby" aria-pressed="false"><b>STANDBY</b><small data-scene="standby">待機画面・画面全体</small></button>
+          <button class="mode" data-mode="pre" aria-pressed="true"><b>OPENING</b><small data-scene="pre">オープニング・全幅</small></button>
+          <button class="mode" data-mode="live" aria-pressed="false"><b>LIVE</b><small data-scene="live">対戦中・コンパクト</small></button>
+          <button class="mode" data-mode="champion" aria-pressed="false"><b>WINNER</b><small data-scene="champion">優勝決定・コンパクト</small></button>
+          <button class="mode" data-mode="interview" aria-pressed="false"><b>INTERVIEW</b><small data-scene="interview">インタビュー・全幅</small></button>
         </div>
         <div class="row" style="margin-top:10px">
           <button class="btn" id="next">次のメッセージ</button>
@@ -238,8 +248,8 @@
       </section>
 
       <section class="card">
-        <h2>CHAMPION</h2>
-        <label class="field" for="champ">優勝者（優勝決定・インタビューで表示）
+        <h2>NAME</h2>
+        <label class="field" for="champ" id="champ-poker"><span id="champ-label">優勝者</span>（{name} の場所に入る）
           <select id="champ">
             <option value="">未選択</option>
             <option>ハヤト</option>
@@ -253,6 +263,12 @@
             <option>Shiori</option>
           </select>
         </label>
+        <label class="field" for="champ-text" id="champ-free" hidden><span id="champ-label2">受賞者</span>（{name} の場所に入る・自由入力）
+          <input type="text" id="champ-text" autocomplete="off">
+        </label>
+        <div class="row" id="champ-free-btn" style="margin-top:8px" hidden>
+          <button class="btn primary" id="champ-apply">反映</button>
+        </div>
       </section>
 
       <section class="card">
@@ -263,6 +279,33 @@
     </div>
 
     <div class="settings">
+      <section class="card design" id="design-card">
+        <h2>DESIGN</h2>
+        <div class="themes" role="group" aria-label="デザインテンプレ">
+          <button type="button" data-theme="poker" aria-pressed="true"><i style="background:linear-gradient(90deg,#08080b,#e7c36a)"></i><b>ポーカー</b><small>黒と金</small></button>
+          <button type="button" data-theme="academic" aria-pressed="false"><i style="background:linear-gradient(90deg,#08162c,#7cc8f2)"></i><b>学会</b><small>紺と青</small></button>
+          <button type="button" data-theme="agm" aria-pressed="false"><i style="background:linear-gradient(90deg,#0c1426,#d6c08f)"></i><b>株主総会</b><small>濃紺と金・明朝</small></button>
+        </div>
+        <p class="hint">テンプレを押すと、そのテンプレの初期の文言に切り替わります（書き換えたテロップは元に戻ります）。</p>
+        <div class="dgrid">
+          <label class="field" for="d-org">主催・団体名<input type="text" id="d-org" autocomplete="off"></label>
+          <label class="field" for="d-sub">サブタイトル<input type="text" id="d-sub" autocomplete="off"></label>
+          <label class="field" for="d-tag">小さな枠の文字（年・期など）<input type="text" id="d-tag" autocomplete="off"></label>
+          <label class="field" for="d-short">短い表記（対戦中の帯の右）<input type="text" id="d-short" autocomplete="off"></label>
+          <label class="field" for="d-mono">ロゴの文字（ポーカー以外・1〜2文字）<input type="text" id="d-mono" maxlength="3" autocomplete="off"></label>
+          <label class="field" for="d-start">待機画面の開始時刻（空ならカウントダウンなし）<input type="datetime-local" id="d-start"></label>
+          <label class="field" for="d-sbtitle">待機画面の見出し<input type="text" id="d-sbtitle" autocomplete="off"></label>
+          <label class="field" for="d-listcap">待機画面のリストの見出し<input type="text" id="d-listcap" autocomplete="off"></label>
+          <label class="field full" for="d-info">待機画面の案内（**で囲むと強調）<input type="text" id="d-info" autocomplete="off"></label>
+          <label class="field full" for="d-items">待機画面のリスト（1行に1つ。「番号 | 名前 | 補足」の形）
+            <textarea id="d-items" rows="6" placeholder="13:00 | 基調講演 | ○○大学 ○○ 教授"></textarea>
+          </label>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="design-apply">デザインを反映</button>
+          <button class="btn" id="design-reset">このテンプレの初期値に戻す</button>
+        </div>
+      </section>
       <section class="card">
         <h2>OBS</h2>
         <div class="sub" style="margin-top:0">配信用パソコンの OBS に登録する URL（ブラウザソース・幅1920・高さ1080）</div>
@@ -324,6 +367,7 @@
   const RELAY = "https://ntfy.sh/";
   const CLIENT = Math.random().toString(36).slice(2, 10);   // この画面の識別（自分の送信を二重に反映しない）
   const LABELS = { standby: "待機画面", pre: "オープニング", live: "対戦中", champion: "優勝決定", interview: "ヒーローインタビュー" };
+  const LAYOUT_NOTE = { standby: "画面全体", pre: "全幅", live: "コンパクト", champion: "コンパクト", interview: "全幅" };
   const FULL = { standby: true, pre: true, interview: true };
 
   // ---------- 合言葉 ----------
@@ -382,7 +426,7 @@
   }
 
   // ---------- 状態 ----------
-  const state = { mode: "pre", name: "", sponsor: true, chips: false, telop: {}, speaker: null };
+  const state = { mode: "pre", name: "", sponsor: true, chips: false, telop: {}, speaker: null, design: { theme: "poker" } };
   const frame = document.getElementById("band");
   // ブラウザに残った古い帯を出さないよう、開くたびに最新を読み込む
   frame.src = "overlay.html?v=" + Date.now();
@@ -393,20 +437,89 @@
   new ResizeObserver(fit).observe(monitor);
   fit();
 
+  // ---------- デザインテンプレ ----------
+  // テンプレの初期値は帯（プレビューの iframe）から読む
+  function themes() { try { return frame.contentWindow.FT_THEMES || null; } catch (e) { return null; } }
+  function themeOf() { return state.design && state.design.theme || "poker"; }
+  function sceneName(m) {
+    const t = themes(); const th = t && t[themeOf()];
+    return th && th.scenes && th.scenes[m] || LABELS[m];
+  }
   function render() {
     document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
     const showName = (state.mode === "champion" || state.mode === "interview") && state.name;
-    document.getElementById("now").textContent = LABELS[state.mode] + (showName ? "：" + state.name : "");
+    document.getElementById("now").textContent = sceneName(state.mode) + (showName ? "：" + state.name : "");
+    document.querySelectorAll("[data-scene]").forEach(el => { el.textContent = sceneName(el.dataset.scene) + "・" + LAYOUT_NOTE[el.dataset.scene]; });
+    const poker = themeOf() === "poker";
+    document.querySelectorAll("[data-theme]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.theme === themeOf())));
+    const th = themes() && themes()[themeOf()];
+    document.getElementById("champ-label").textContent = document.getElementById("champ-label2").textContent = (th && th.nameLabel) || "優勝者";
+    document.getElementById("champ-poker").hidden = !poker;
+    document.getElementById("champ-free").hidden = document.getElementById("champ-free-btn").hidden = poker;
+    if (document.activeElement !== document.getElementById("champ-text")) document.getElementById("champ-text").value = state.name;
     document.getElementById("champ").value = state.name;
     document.getElementById("chips").checked = state.chips;
     document.getElementById("sponsor").checked = state.sponsor;
     // 見本の背景：全幅の場面はKADOSHUNのオーバーレイを出さないので隠す
-    ref.hidden = !!FULL[state.mode];
+    ref.hidden = !!FULL[state.mode] || themeOf() !== "poker";   // 見本の画面はポーカーのものだけ
     ref.src = state.chips ? "img/ref_chips.jpg" : "img/ref_hand.jpg";
     fillTelop();
     document.getElementById("sp-now").textContent = state.speaker
       ? "表示中：" + (state.speaker.role ? state.speaker.role + "／" : "") + state.speaker.name : "表示中：スポンサー";
   }
+
+  // ---------- デザイン欄 ----------
+  const D = id => document.getElementById(id);
+  function defaultsFor(th) {
+    const t = themes(); const brand = t && t[th] ? t[th].brand : {};
+    let sb = {};
+    try { sb = frame.contentWindow.FT_standby(th); } catch (e) {}
+    return { brand, sb };
+  }
+  // 1行「番号 | 名前 | 補足」⇔ リスト
+  const itemsToText = items => (items || []).map(i => [i.no, i.name, i.sub].map(x => x || "").join(" | ").replace(/( \| )+$/, "")).join("\n");
+  function textToItems(text, th) {
+    const base = defaultsFor(th).sb.items || [];
+    return text.split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+      const [no = "", name = "", sub = ""] = l.split("|").map(x => x.trim());
+      const prev = base.find(b => b.name === name) || {};
+      return { no, name, sub, ...(prev.chips ? { chips: prev.chips } : {}), ...(prev.revive ? { revive: true } : {}) };
+    });
+  }
+  function fillDesign() {
+    const th = themeOf(), { brand, sb } = defaultsFor(th), d = state.design || {}, b = d.brand || {};
+    const val = (x, y) => (typeof x === "string" && x !== "" ? x : (y || ""));
+    D("d-org").value = val(b.org, brand.org); D("d-sub").value = val(b.sub, brand.sub);
+    D("d-tag").value = val(b.tag, brand.tag); D("d-short").value = val(b.short, brand.short); D("d-mono").value = val(b.mono, brand.mono);
+    const st = typeof d.start === "string" ? d.start : (sb.start || "");
+    D("d-start").value = st ? st.slice(0, 16) : "";
+    D("d-sbtitle").value = val(d.sbTitle, sb.title); D("d-listcap").value = val(d.listCap, sb.listCap);
+    D("d-info").value = val(d.info, String(sb.info || "").replace(/<em>(.*?)<\/em>/g, "**$1**").replace(/<[^>]+>/g, ""));
+    D("d-items").value = Array.isArray(d.items) && d.items.length ? itemsToText(d.items) : itemsToText(sb.items);
+  }
+  document.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => {
+    if (themeOf() === b.dataset.theme) return;
+    state.design = { theme: b.dataset.theme };
+    state.telop = {};                       // 前のテンプレで書き換えたテロップは持ち越さない
+    fillDesign(); render(); send("set");
+  }));
+  D("design-apply").addEventListener("click", () => {
+    const th = themeOf();
+    state.design = {
+      theme: th,
+      brand: { org: D("d-org").value.trim(), sub: D("d-sub").value.trim(), tag: D("d-tag").value.trim(), short: D("d-short").value.trim(), mono: D("d-mono").value.trim() },
+      start: D("d-start").value,
+      sbTitle: D("d-sbtitle").value.trim(), listCap: D("d-listcap").value.trim(), info: D("d-info").value.trim(),
+      items: textToItems(D("d-items").value, th),
+    };
+    render(); send("set");
+  });
+  D("design-reset").addEventListener("click", () => {
+    state.design = { theme: themeOf() };
+    fillDesign(); render(); send("set");
+  });
+  D("champ-apply").addEventListener("click", () => { state.name = D("champ-text").value.trim(); render(); send("set"); });
+  D("champ-text").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) D("champ-apply").click(); });
 
   // ---------- 話している人（自由入力。よく使う言葉はボタンで入る） ----------
   document.querySelectorAll(".quick").forEach(q => q.addEventListener("click", e => {
@@ -429,9 +542,8 @@
   // 元の文言は帯（プレビューの iframe）の CONFIG から読む。<em>…</em> は **…** で見せる
   const toStars = h => String(h).replace(/<em>(.*?)<\/em>/g, "**$1**").replace(/<[^>]+>/g, "");
   function defaultsOf(mode) {
-    let cfg = null;
-    try { cfg = frame.contentWindow.FT_CONFIG; } catch (e) {}
-    const m = cfg && cfg.modes && cfg.modes[mode];
+    let m = null;
+    try { m = frame.contentWindow.FT_effective(themeOf(), mode); } catch (e) {}
     return m ? { label: m.label || "", msgs: (m.messages || []).map(toStars) } : { label: "", msgs: [] };
   }
   let telopShownFor = null;
@@ -439,7 +551,7 @@
     const card = document.getElementById("telop-card");
     const standby = state.mode === "standby";
     card.classList.toggle("telop-off", standby);
-    document.getElementById("telop-scene").textContent = LABELS[state.mode];
+    document.getElementById("telop-scene").textContent = sceneName(state.mode);
     document.getElementById("telop-note").textContent = standby ? "（待機画面にテロップはありません）" : (state.telop[state.mode] ? "（書き換え中）" : "");
     // 入力中は上書きしない（場面が変わったとき・外から変わったときだけ入れ直す）
     const typing = document.activeElement && ["telop-label", "telop-msgs"].includes(document.activeElement.id);
@@ -474,7 +586,7 @@
   const log = document.getElementById("log");
   let sayText = "";
   async function send(act) {
-    const msg = { type: "ft-band", act, from: CLIENT, mode: state.mode, name: state.name, sponsor: state.sponsor, chips: state.chips, telop: state.telop, speaker: state.speaker };
+    const msg = { type: "ft-band", act, from: CLIENT, mode: state.mode, name: state.name, sponsor: state.sponsor, chips: state.chips, telop: state.telop, speaker: state.speaker, design: state.design };
     if (act === "say") msg.text = sayText;
     frame.contentWindow && frame.contentWindow.postMessage(msg, "*");   // プレビュー
     log.textContent = "送信中…";
@@ -539,12 +651,13 @@
         if (typeof d.chips === "boolean") state.chips = d.chips;
         if (d.telop && typeof d.telop === "object") state.telop = d.telop;
         if ("speaker" in d) state.speaker = d.speaker || null;
+        if (d.design && typeof d.design === "object") state.design = d.design;
         break;
       }
     } catch (e) { setConn(false); }
     render();
     // プレビューを今の設定に合わせる
-    const sync = () => { frame.contentWindow.postMessage({ type: "ft-band", act: "mode", ...state }, "*"); fillTelop(true); };
+    const sync = () => { frame.contentWindow.postMessage({ type: "ft-band", act: "mode", ...state }, "*"); fillTelop(true); fillDesign(); render(); };
     if (frame.contentDocument && frame.contentDocument.readyState === "complete") setTimeout(sync, 300);
     else frame.addEventListener("load", () => setTimeout(sync, 300), { once: true });
   }
@@ -564,6 +677,7 @@
         Object.assign(state, { mode: LABELS[d.mode] ? d.mode : state.mode, name: d.name ?? state.name, sponsor: d.sponsor ?? state.sponsor, chips: d.chips ?? state.chips });
         if (d.telop && typeof d.telop === "object") { state.telop = d.telop; telopShownFor = null; }
         if ("speaker" in d) state.speaker = d.speaker || null;
+        if (d.design && typeof d.design === "object") { state.design = d.design; fillDesign(); }
         render();
         frame.contentWindow && frame.contentWindow.postMessage({ ...d, type: "ft-band" }, "*");   // プレビューも合わせる
       } catch (e) {}
